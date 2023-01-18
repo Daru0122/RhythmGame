@@ -7,7 +7,12 @@ using UnityEngine.Networking;
 
 public class BMSdataManager : MonoBehaviour
 {
-    private AudioSource audiosource;
+    List<int> noteData;
+    List<float> noteBeat;
+    FMOD.Sound[] snd;
+    FMOD.System system;
+    FMOD.Channel channel;
+    FMOD.ChannelGroup channelGroup;
     //HEADER FILED 선언
     int PLAYER;//1:SP,2:Couple,3:DP
     string GENRE;
@@ -30,29 +35,13 @@ public class BMSdataManager : MonoBehaviour
     public string fileLoc;
     public static List<string> WAV_num = new List<string>();
     public static List<string> WAV_file = new List<string>();
-
-    private IEnumerator LoadAudio(string audioFileName){
-        AudioClip clip = null;
-        UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(audioFileName, AudioType.OGGVORBIS);
-        yield return  request.SendWebRequest();
-        if(request.result == UnityWebRequest.Result.Success){
-            clip = DownloadHandlerAudioClip.GetContent(request);
-            audiosource.clip = clip;
-            audiosource.Play();
-            Debug.Log("재생");
-        }
-    }
-    void Start()
-    {
-        audiosource = GetComponent<AudioSource>();
+    void Start(){
+        system = FMODUnity.RuntimeManager.CoreSystem;
         fileLoc = "C:/Program Files (x86)/Steam/steamapps/common/Qwilight/SavesDir/Bundle/Amnehilesie1108/Amnehilesie";
-        StartCoroutine(LoadAudio(fileLoc+"/bgm1.ogg"));
         StreamReader testStR = new StreamReader(new FileStream(fileLoc+"/amnehilasieSPA.bms", FileMode.Open));
-        while (true != testStR.EndOfStream)
-        {
+        while (true != testStR.EndOfStream){
             input = testStR.ReadLine();
-            if(input.Length >= 1 && input.Substring(0,1) == "#")
-            {
+            if(input.Length >= 1 && input.Substring(0,1) == "#"){
                 if(input.IndexOf(' ') > 0){
                 //HEADER FIELD
                     if(input.Substring(1,input.IndexOf(" ")-1) == "PLAYER"){
@@ -89,9 +78,24 @@ public class BMSdataManager : MonoBehaviour
                         WAV_file.Add(input.Substring(input.IndexOf(" ")+1));
                         WAV_num.Add(input.Substring(4,2));
                     }
+                }if(input.Substring(0,1) == "#" && input.Substring(6,1) == ":"){
+                    Debug.Log(input);
+                    noteData.Add(int.Parse(input.Substring(1,5)));
+                    noteBeat.Add(float.Parse(input.Substring(1,5)));
                 }
             }
         }
         testStR.Close();
+        snd = new FMOD.Sound[WAV_file.Count];
+        for(int i = 0; WAV_file.Count > i;){
+            system.createChannelGroup (null, out channelGroup);
+            channel.setChannelGroup(channelGroup);
+            system.createSound(fileLoc+"/"+WAV_file[i], FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd[i]);
+            i ++;
+        }
+        system.playSound(snd[1], channelGroup, false,out channel);
+    }
+    void Update() {
+        
     }
 }
