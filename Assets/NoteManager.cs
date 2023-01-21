@@ -4,29 +4,26 @@ using UnityEngine;
 
 public class NoteManager : MonoBehaviour
 {
-    public float bpm = 60f;
-    public static int GreenNumber = 500;
+    public string noteBeat;
+    public float secBPM;
+    public float secScroll;
+    public float secScale;
     [SerializeField]  GameObject N_2;
-    public static float SectionTime;
-    public static float Tt = 0f;
-    public static float NoteTime;
-    Transform N2_pos;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    N2 N2com;
+    void Start(){
+        StartCoroutine(noteInstantiate());
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        Tt += Time.deltaTime;
-        if(Tt - SectionTime >= 0){
-            NoteTime = SectionTime;
-            GameObject N2s = Instantiate(N_2);
-            SectionTime += 60 / bpm;
-            N2_pos = N_2.GetComponent<Transform>();
+    IEnumerator noteInstantiate(){
+        yield return null;
+        for(int i = 0; i < noteBeat.Length/2;){
+            yield return new WaitUntil(()=>BMSdataManager.totalSCROLL >=  secScroll+secScale*i*(240/secBPM/(noteBeat.Length/2)));
+            if(noteBeat.Substring(i*2,2) != "00"){
+                GameObject N2s = Instantiate(N_2);
+                N2com = N2s.GetComponent<N2>();
+                N2com.scroll = secScroll+secScale*i*(240/secBPM/(noteBeat.Length/2));
+                N2com.snd = BMSdataManager.WAV_num.BinarySearch(noteBeat.Substring(i*2,2));
+            }
+            i++;
         }
-
     }
 }

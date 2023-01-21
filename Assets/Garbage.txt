@@ -1,0 +1,35 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Garbage : MonoBehaviour
+{
+    IEnumerator startPerJoint(){
+        yield return null;
+        float SectionTime = 0f;
+        for(int i = 0; noteData.Length > i;){
+            if(currentJoint < noteJoint[i]){
+                //이 사이에 bpm변경 들어갈 예정
+                SectionTime += 240/BPM;
+                currentJoint++;
+            }
+            yield return new WaitUntil(() => tT >= SectionTime);
+            if(noteData[i] != 2){
+                StartCoroutine(startPerLine(noteData[i], noteBeat[i], SectionTime));
+            }
+            i++;
+        }
+    }
+    IEnumerator startPerLine(int note, string beat, float jointTime){
+        yield return null;
+        int nextPlay = 0;
+        for(int i = 0; i < beat.Length/2;){
+            nextPlay = System.Array.IndexOf(WAV_num, beat.Substring(i,2));
+            yield return new WaitUntil(() => tT >= jointTime+i*240/BPM/(beat.Length/2));
+            if(beat.Substring(i,2) != "00"){
+                system.playSound(snd[nextPlay], channelGroup, false,out channel);
+            }
+            i++;
+        }
+    }
+}

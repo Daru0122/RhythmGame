@@ -4,20 +4,14 @@ using UnityEngine;
 
 public class N2 : MonoBehaviour
 {
-    float Notetime;
-    // Start is called before the first frame update
-    void Start()
-    {
-        Notetime = NoteManager.NoteTime;
-    }
-
-    // Update is called once per frame
+    public float scroll;
+    public int snd;
     void Update()
     {
-        gameObject.transform.position = new Vector3(92, 1080 - ((NoteManager.Tt - Notetime) * 723 * 1000 / NoteManager.GreenNumber) , 0);
-        if((NoteManager.Tt - Notetime) * 1000 >= NoteManager.GreenNumber){
+        gameObject.transform.position = new Vector3(92, 1080 - ((BMSdataManager.totalSCROLL-scroll)*1000) , 0);
+        if((BMSdataManager.totalSCROLL-scroll)*1000 >= 723){
+            FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.snd[snd], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
             Destroy(gameObject);
-            Debug.Log("부셔");
         }
     }
 }

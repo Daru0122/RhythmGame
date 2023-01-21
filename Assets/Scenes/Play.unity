@@ -367,7 +367,6 @@ GameObject:
   m_Component:
   - component: {fileID: 650755257}
   - component: {fileID: 650755256}
-  - component: {fileID: 650755258}
   m_Layer: 0
   m_Name: P 12
   m_TagString: Untagged
@@ -442,20 +441,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &650755258
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 650755255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9a940677a699f74c9b2168cd0b8de9e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bpm: 60
-  N_2: {fileID: 1580930606494118659, guid: 49618914fb26e5b429399d87cf18a83c, type: 3}
 --- !u!1 &961491751
 GameObject:
   m_ObjectHideFlags: 0
@@ -486,7 +471,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 493649c4ba4dd6146bcc697923763a99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fileLoc: 
+  fileLoc: C:/Program Files (x86)/Steam/steamapps/common/Qwilight/SavesDir/Bundle/Amnehilesie1108/Amnehilesie
+  nManager: {fileID: 1326999832575741695, guid: 7c178edf3cccc7c4ba4d0f3b32a8cf41, type: 3}
+  loadDone: 0
 --- !u!4 &961491753
 Transform:
   m_ObjectHideFlags: 0
