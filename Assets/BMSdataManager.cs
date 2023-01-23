@@ -7,6 +7,10 @@ using System.Text;
 
 public class BMSdataManager : MonoBehaviour
 {
+    public static Dictionary<string, string> BGA;
+    public static Dictionary<string, FMOD.Sound> WAV = new Dictionary<string, FMOD.Sound>();
+    public bool[] LNactive = new bool[9];
+    public float HI_SPEED;
     public string fileLoc = "C:/Program Files (x86)/Steam/steamapps/common/Qwilight/SavesDir/Bundle/Amnehilesie1108/Amnehilesie";//파일 위치 지정
     public static float totalSCROLL;
     float scrollPerJoint;
@@ -18,7 +22,7 @@ public class BMSdataManager : MonoBehaviour
     List<int> noteJoint = new List<int>();
     List<int> noteData = new List<int>();
     List<string> noteBeat = new List<string>();
-    public static FMOD.Sound[] snd;
+    private FMOD.Sound snd;
     FMOD.System system;
     public static FMOD.Channel channel;
     public static FMOD.ChannelGroup channelGroup;
@@ -42,8 +46,6 @@ public class BMSdataManager : MonoBehaviour
     //--------------------------------------------
     string input;
     string[] splitText;
-    public static List<string> WAV_num = new List<string>();
-    public static List<string> WAV_file = new List<string>();
     public float loadDone;
 
     void Start(){
@@ -51,21 +53,29 @@ public class BMSdataManager : MonoBehaviour
     }
     void Update() {
         if(loadDone >= 1){
-            tT += Time.deltaTime;
-            totalSCROLL += Time.deltaTime;
+            tT += Time.deltaTime;//1초에 1만큼
+            totalSCROLL += Time.deltaTime*600*BPM/174545;
+            //녹숫 = 174545/(BPM) (600=1000ms) bpm60일때 2909.08333....
+            //속도 = 1000 / 녹숫ms (표시영역이 1일때 1초당) = 600/(174545/bpm)=600*bpm/174545
+            //구역크기 = 1초에 1만큼 움직일때 = 240/bpm, 1초에 2만큼 = 480/bpm     =(240*600*bpm/174545)/bpm = 144000/174545
         }
     }
     IEnumerator BMSload(){
+        yield return null;
         Debug.Log("로딩 시작");
+        for(int i = 0; i <= 8;){
+            LNactive[i] = false;
+            i++;
+        }
+        system.createChannelGroup (null, out channelGroup);
+        channel.setChannelGroup(channelGroup);
 
         seps = new char[] {' ', ':'};//데이터 Splt 기준 정함
         system = FMODUnity.RuntimeManager.CoreSystem;
         StreamReader reader = new StreamReader(new FileStream(fileLoc+"/amnehilasieSPN.bms", FileMode.Open), Encoding.GetEncoding("shift_jis"));
-        yield return null;
         //bms파일 판단하고 변수로 저장하는 과정
         while (!reader.EndOfStream){
             input = reader.ReadLine();
-            Debug.Log(input);
             if(input.Length >= 4 && !input.StartsWith("*")){
                 splitText = input.Split(seps);
                 //HEADER FIELD
@@ -100,8 +110,14 @@ public class BMSdataManager : MonoBehaviour
                     LNTYPE = int.Parse(input.Substring(input.IndexOf(" ")+1));
                 }//-----------------------------WAV----------------------------
                 else if(input.Substring(1,3) == "WAV"){
-                    WAV_file.Add(input.Substring(input.IndexOf(" ")+1));
-                    WAV_num.Add(input.Substring(4,2));
+                    system.createSound(fileLoc+"/"+input.Substring(input.IndexOf(" ")+1), FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
+                    WAV.Add(input.Substring(4,2),snd);
+                }//----------------------------BGA---------------------
+                else if(input.Substring(1,3) == "BMP"){
+
+                }//------------------------BPM---------------
+                else if(input.Substring(1,3) == "BPM"){
+
                 }//-----------------------MAIN DATA FIELD----------------------
                 if(input.Substring(0,1) == "#" && input.Substring(6,1) == ":"){
                     noteJoint.Add(int.Parse(input.Split(':')[0].Substring(1,3)));
@@ -111,16 +127,6 @@ public class BMSdataManager : MonoBehaviour
             }
         }
         reader.Close();
-        yield return null;
-        //FMOD 소리 메모리에 넣는?과정
-        snd = new FMOD.Sound[WAV_file.Count];
-        for(int i = 0; WAV_file.Count > i;){
-            system.createChannelGroup (null, out channelGroup);
-            channel.setChannelGroup(channelGroup);
-            system.createSound(fileLoc+"/"+WAV_file[i], FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd[i]);
-            i ++;
-        }
-        yield return null;
         //구역마다 크기를 미리 저장
         for(int i = 0; noteJoint.Count > i;){
             while(noteJoint.Count > i && currentJoint <= noteJoint[i]){
@@ -133,10 +139,8 @@ public class BMSdataManager : MonoBehaviour
                 i++;
             }
             i++;
-            yield return null;
         }
         Debug.Log("완료");
-        loadDone = 1;
         StartCoroutine(startPerJoint());
 
     }
@@ -144,26 +148,36 @@ public class BMSdataManager : MonoBehaviour
         float SectionTime = 0f;
         currentJoint = 0;
         for(int i = 0; noteJoint.Count > i;){
-            yield return null;
             if(currentJoint < noteJoint[i]){
                 //이 사이에 bpm변경 들어갈 예정
-                scrollPerJoint += (240/BPM)*scalePerJoint[currentJoint];
-                SectionTime += scalePerJoint[currentJoint]*240/BPM;
+                SectionTime += (240/BPM)*scalePerJoint[currentJoint];
+                scrollPerJoint += scalePerJoint[currentJoint]*144000/174545;
                 currentJoint++;
             }
             while(noteJoint.Count > i && currentJoint >= noteJoint[i]){
                 if(noteData[i]>10||noteData[i].Equals(1)){
-                    yield return null;
                     GameObject noteManager = Instantiate(nManager);
-                    NoteManager nManagerCom = nManager.GetComponent<NoteManager>();
+                    NoteManager nManagerCom = noteManager.GetComponent<NoteManager>();
+                    nManagerCom.SecTime = SectionTime;
                     nManagerCom.noteBeat = noteBeat[i];
                     nManagerCom.secBPM = BPM;
                     nManagerCom.secScroll = scrollPerJoint;
                     nManagerCom.secScale = scalePerJoint[currentJoint];
+                    nManagerCom.secType = noteData[i];
+                    nManagerCom.loadDone = false;
+                    if(noteData[i]>50){
+                        nManagerCom.LNactive = LNactive[noteData[i]-51];
+                    }
+                    if(!noteData[i].Equals(1)){
+                        yield return new WaitUntil(()=> nManagerCom.loadDone);
+                        Destroy(noteManager);
+                    }
+                    Debug.Log("노트생성 완");
                 }
                 i++;
             }
             i++;
         }
+        loadDone = 1;
     }
 }
