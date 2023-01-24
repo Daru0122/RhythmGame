@@ -73,18 +73,47 @@ public class Note : MonoBehaviour
             }
             xLoc = Location[type-50];
         }
+        if(EX != 2){
+            StartCoroutine(Judgement());
+        }
     }
     void Update()
     {
         gameObject.transform.position = new Vector3(xLoc, 1080 - ((BMSdataManager.totalSCROLL-scroll+(1/HI_SPEED))*723*HI_SPEED) , 0);
-        if(BMSdataManager.tT >= time){
-            FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[snd], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
-            if(EX.Equals(1)){
-                Debug.Log("롱놑 시작");
-            }else if(EX.Equals(2)){
-                Debug.Log("롱놑 끝");
+        if(EX.Equals(2)){
+            if(BMSdataManager.tT.ElapsedMilliseconds >= 1000*time){
+                Destroy(gameObject);
             }
-            Destroy(gameObject);
+        }else{
+            if(BMSdataManager.tT.ElapsedMilliseconds >= 1000*time+BMSdataManager.judgeTimings[4]){
+                Destroy(gameObject);
+            }
         }
+    }
+    IEnumerator Judgement(){
+        if(EX.Equals(0)){
+            while(bmsDM.notes[type-11].Count > 0){
+                yield return new WaitUntil (()=> Input.GetKey(BMSdataManager.keyBinds[type-11]).Equals(false));
+                bmsDM.inputActive[type-11]=true;
+                yield  return new WaitUntil (()=> Input.GetKeyDown(BMSdataManager.keyBinds[type-11]));
+                if(BMSdataManager.tT.ElapsedMilliseconds >= time*1000-BMSdataManager.judgeTimings[1] && BMSdataManager.tT.ElapsedMilliseconds <= time*1000 + BMSdataManager.judgeTimings[1]){
+                    FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[snd], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                    bmsDM.inputActive[type-11] = false;
+                    Destroy(gameObject);
+                }
+            }
+        }else{
+            while(bmsDM.notes[type-11].Count > 0){
+                yield return new WaitUntil (()=> Input.GetKey(BMSdataManager.keyBinds[type-51]).Equals(false));
+                bmsDM.inputActive[type-51]=true;
+                yield  return new WaitUntil (()=> Input.GetKeyDown(BMSdataManager.keyBinds[type-51]));
+                if(BMSdataManager.tT.ElapsedMilliseconds >= time*1000-BMSdataManager.judgeTimings[1] && BMSdataManager.tT.ElapsedMilliseconds <= time*1000 + BMSdataManager.judgeTimings[1]){
+                    FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[snd], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                    bmsDM.inputActive[type-51] = false;
+                    Destroy(gameObject);
+                }
+            }
+        }
+        
     }
 }

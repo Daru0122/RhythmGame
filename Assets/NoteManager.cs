@@ -22,7 +22,7 @@ public class NoteManager : MonoBehaviour
     IEnumerator noteInstantiate(){
         if(secType.Equals(1)){//배경음일때
             for(int i = 0; i < noteBeat.Length/2;){
-                yield return new WaitUntil(()=> BMSdataManager.tT >= SecTime+i*secScale*(240/secBPM)/(noteBeat.Length/2));
+                yield return new WaitUntil(()=> BMSdataManager.tT.ElapsedMilliseconds >= 1000*(SecTime+i*secScale*(240/secBPM)/(noteBeat.Length/2)));
                 if(noteBeat.Substring(i*2,2) != "00"){
                     FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[noteBeat.Substring(i*2,2)], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
                 }
@@ -40,6 +40,7 @@ public class NoteManager : MonoBehaviour
                     }else {
                         N2com.EX = 1;//롱노트 시작 표시
                         bmsDM.LNactive[secType-51] = true;
+                        bmsDM.notes[secType-51].Enqueue(N2s);
                     }
                     N2com.type = secType;
                     N2com.scroll = secScroll+secScale*144000/174545*i/(noteBeat.Length/2);
@@ -59,6 +60,7 @@ public class NoteManager : MonoBehaviour
                     N2com.scroll = secScroll+secScale*144000/174545*i/(noteBeat.Length/2);
                     N2com.snd = noteBeat.Substring(i*2,2);
                     N2com.time = SecTime+i*secScale*(240/secBPM)/(noteBeat.Length/2);
+                    bmsDM.notes[secType-11].Enqueue(N2s);
                 }
                 i++;
             }

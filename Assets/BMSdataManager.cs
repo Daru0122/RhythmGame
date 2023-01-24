@@ -7,16 +7,24 @@ using System.Text;
 
 public class BMSdataManager : MonoBehaviour
 {
-    public static Dictionary<string, string> BGA;
+    public static KeyCode[] keyBinds = new KeyCode[9];
+    public bool[] inputActive = new bool[9];
+    public int combos;
+    public int score;
+    public static float[] judgeTimings = new float[5];
+    public List<Queue<GameObject>> notes = new List<Queue<GameObject>>();
+    public static Dictionary<string, string> BGA = new Dictionary<string, string>();
+    public static Dictionary<string, float> BPMs = new Dictionary<string, float>();
     public static Dictionary<string, FMOD.Sound> WAV = new Dictionary<string, FMOD.Sound>();
     public bool[] LNactive = new bool[9];
     public float HI_SPEED;
-    public string fileLoc = "C:/Program Files (x86)/Steam/steamapps/common/Qwilight/SavesDir/Bundle/Amnehilesie1108/Amnehilesie";//파일 위치 지정
+    public static string fileLoc = "C:/Program Files (x86)/Steam/steamapps/common/Qwilight/SavesDir/Bundle/Amnehilesie1108/Amnehilesie";//파일 위치 지정
     public static float totalSCROLL;
     float scrollPerJoint;
     List<float> scalePerJoint = new List<float>();
     [SerializeField] GameObject nManager;
-    public static float tT;
+    [SerializeField] GameObject VideoPlayer;
+    public static System.Diagnostics.Stopwatch tT = new System.Diagnostics.Stopwatch();
     int currentJoint;
     private char[] seps;
     List<int> noteJoint = new List<int>();
@@ -49,16 +57,36 @@ public class BMSdataManager : MonoBehaviour
     public float loadDone;
 
     void Start(){
+        judgeTimings[0] = 40;
+        judgeTimings[1] = 80;
+        judgeTimings[2] = 120;
+        judgeTimings[3] = 15;
+        judgeTimings[4] = 150;
+        keyBinds[0] = KeyCode.S;
+        keyBinds[1] = KeyCode.D;
+        keyBinds[2] = KeyCode.F;
+        keyBinds[3] = KeyCode.Space;
+        keyBinds[4] = KeyCode.J;
+        keyBinds[5] = KeyCode.LeftShift;
+        keyBinds[7] = KeyCode.K;
+        keyBinds[8] = KeyCode.L;
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
+        notes.Add(new Queue<GameObject>());
         StartCoroutine(BMSload());
     }
     void Update() {
-        if(loadDone >= 1){
-            tT += Time.deltaTime;//1초에 1만큼
-            totalSCROLL += Time.deltaTime*600*BPM/174545;
-            //녹숫 = 174545/(BPM) (600=1000ms) bpm60일때 2909.08333....
-            //속도 = 1000 / 녹숫ms (표시영역이 1일때 1초당) = 600/(174545/bpm)=600*bpm/174545
-            //구역크기 = 1초에 1만큼 움직일때 = 240/bpm, 1초에 2만큼 = 480/bpm     =(240*600*bpm/174545)/bpm = 144000/174545
-        }
+        totalSCROLL = tT.ElapsedMilliseconds*0.6f*BPM/174545;
+    }
+    IEnumerator play(){
+        yield return new WaitUntil(()=> loadDone >= 1);
+        tT.Start();
     }
     IEnumerator BMSload(){
         yield return null;
@@ -114,10 +142,10 @@ public class BMSdataManager : MonoBehaviour
                     WAV.Add(input.Substring(4,2),snd);
                 }//----------------------------BGA---------------------
                 else if(input.Substring(1,3) == "BMP"){
-
+                    BGA.Add(input.Substring(4,2), input.Substring(input.IndexOf(' ')+1));
                 }//------------------------BPM---------------
                 else if(input.Substring(1,3) == "BPM"){
-
+                    BPMs.Add(input.Substring(4,2), float.Parse(input.Substring(input.IndexOf(' '))));
                 }//-----------------------MAIN DATA FIELD----------------------
                 if(input.Substring(0,1) == "#" && input.Substring(6,1) == ":"){
                     noteJoint.Add(int.Parse(input.Split(':')[0].Substring(1,3)));
@@ -172,12 +200,18 @@ public class BMSdataManager : MonoBehaviour
                         yield return new WaitUntil(()=> nManagerCom.loadDone);
                         Destroy(noteManager);
                     }
-                    Debug.Log("노트생성 완");
+                }else if(noteData[i].Equals(4)){
+                    playVideo playVideo = VideoPlayer.GetComponent<playVideo>();
+                    playVideo.data = noteBeat[i];
+                    playVideo.totalSecTime = SectionTime;
+                    playVideo.secTime = 240*scalePerJoint[i]/BPM;
+                    StartCoroutine(playVideo.play());
                 }
                 i++;
             }
             i++;
         }
         loadDone = 1;
+        StartCoroutine(play());
     }
 }
