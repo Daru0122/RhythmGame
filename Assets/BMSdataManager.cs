@@ -169,6 +169,7 @@ public class BMSdataManager : MonoBehaviour
                 }//-----------------------------WAV----------------------------
                 else if(input.Substring(1,3) == "WAV"){
                     system.createSound(fileLoc+"/"+input.Substring(input.IndexOf(" ")+1), FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
+                    convertFromThirysix(input.Substring(4,2));
                     WAV[(int)output] = snd;
                 }//----------------------------BGA---------------------
                 else if(input.Substring(1,3) == "BMP"){
