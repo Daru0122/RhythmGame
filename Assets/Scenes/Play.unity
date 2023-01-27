@@ -153,9 +153,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d5c0cfc32c745a43b9b86e1844d5b5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secTime: 0
-  totalSecTime: 0
-  data: 
 --- !u!328 &65244228
 VideoPlayer:
   m_ObjectHideFlags: 0
@@ -607,7 +604,6 @@ GameObject:
   m_Component:
   - component: {fileID: 961491753}
   - component: {fileID: 961491752}
-  - component: {fileID: 961491754}
   m_Layer: 0
   m_Name: DataManager
   m_TagString: Untagged
@@ -627,14 +623,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 493649c4ba4dd6146bcc697923763a99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputActive: 000000000000000000
-  combos: 0
-  score: 0
-  LNactive: 000000000000000000
-  HI_SPEED: 2
-  nManager: {fileID: 1326999832575741695, guid: 7c178edf3cccc7c4ba4d0f3b32a8cf41, type: 3}
-  VideoPlayer: {fileID: 65244226}
   loadDone: 0
+  noteObj: {fileID: 1580930606494118659, guid: 49618914fb26e5b429399d87cf18a83c, type: 3}
+  scalePerMeasure: []
+  firstBPM: 0
+  BPM: 0
 --- !u!4 &961491753
 Transform:
   m_ObjectHideFlags: 0
@@ -650,18 +643,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &961491754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 961491751}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86a3ec5a17b90a1489f4b038068afce0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1065353360
 GameObject:
   m_ObjectHideFlags: 0

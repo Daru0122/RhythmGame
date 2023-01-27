@@ -94,21 +94,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1580930606494118659}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7726f5c03bc53b1408b0e273f372ae88, type: 3}
+  m_Script: {fileID: 11500000, guid: 12b1fb5ea21331d4ea3e204aacce5a5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EX: 0
-  Notes:
-  - {fileID: 21300000, guid: f9204a68f1270164d9dfd36bf178b27f, type: 3}
-  - {fileID: 21300000, guid: 52531d8310ae5054a9a9646454ef8842, type: 3}
-  - {fileID: 21300000, guid: 3c9e39c68b6210a40a508a519fc53fa5, type: 3}
-  - {fileID: 21300000, guid: df3808cb1f13aff4a9ebc9900dcc50ba, type: 3}
-  - {fileID: 21300000, guid: 7368896398eb20741b8a21c265a51767, type: 3}
-  - {fileID: 21300000, guid: 98b11a10f7e141f42bf644833a73aa92, type: 3}
-  - {fileID: 21300000, guid: 7c6a2a0e668728744a587753e9245eed, type: 3}
-  - {fileID: 21300000, guid: 0f77584da037a38498f172b756b15a3c, type: 3}
-  - {fileID: 21300000, guid: d2e77e9b36186314abde34084417d7d9, type: 3}
-  time: 0
-  type: 0
-  scroll: 0
-  snd: 0
