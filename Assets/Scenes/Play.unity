@@ -133,7 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 65244229}
   - component: {fileID: 65244228}
-  - component: {fileID: 65244227}
+  - component: {fileID: 65244230}
   m_Layer: 0
   m_Name: Video Player
   m_TagString: Untagged
@@ -141,18 +141,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &65244227
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 65244226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d5c0cfc32c745a43b9b86e1844d5b5f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!328 &65244228
 VideoPlayer:
   m_ObjectHideFlags: 0
@@ -203,6 +191,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &65244230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65244226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90f4f25db9aeedd4a92d12360e864664, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  time: 0
+  fileLoc: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -623,8 +625,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 493649c4ba4dd6146bcc697923763a99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LNactive: 0000000000000000000000000000000000000000
+  LNtime:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
   loadDone: 0
+  barObj: {fileID: 5796801472553576134, guid: b05354cfb5106f64e84e31b0ebbf68b8, type: 3}
   noteObj: {fileID: 1580930606494118659, guid: 49618914fb26e5b429399d87cf18a83c, type: 3}
+  videoObj: {fileID: 65244226}
   scalePerMeasure: []
   firstBPM: 0
   BPM: 0
