@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Ű�� ���ȴ��� �ݺ�Ȯ���ϴ� Ŭ����
+/// 가나다라
 /// </summary>
 public class Judgement : MonoBehaviour
 {
