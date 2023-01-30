@@ -8,7 +8,7 @@ using UnityEngine;
 public class Judgement : MonoBehaviour
 {
     /// <summary>
-    /// �Ҹ���ȣ�� ����
+    /// 테스트
     /// </summary>
     int[] sndPerKey = new int[9];
 
