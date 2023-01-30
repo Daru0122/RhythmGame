@@ -2,20 +2,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Ű�� ���ȴ��� �ݺ�Ȯ���ϴ� Ŭ����
+/// </summary>
 public class Judgement : MonoBehaviour
 {
-    //test
+    /// <summary>
+    /// �Ҹ���ȣ�� ����
+    /// </summary>
     int[] sndPerKey = new int[9];
+
+    /// <summary>
+    /// Ű�����ȴ��� �Ǵ�.
+    /// </summary>
+    /// <param name="noteNum">��Ʈ��ȣ</param>
+    /// <param name="noteScript"></param>
+    /// <param name="note"></param>
     void Judge(int noteNum, Notescript noteScript, GameObject note){
+        //1. ...�� �Ǵ��ϰ� ..�� �Ѵ�.
         if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[1]){
             sndPerKey[noteNum] = noteScript.snd;
             Destroy(note);
             BMSdataManager.dManagerScript.Notes[noteNum].Dequeue();
         }
+        //2. .... �� �Ѵ�.
         if(noteScript.snd!=0){
             FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
         }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator Judgement0(){
         while(BMSdataManager.dManagerScript.Notes[0].Count > 0){
             yield return new WaitUntil(()=> Input.GetKey(BMSdataManager.keyBinds[0]));
