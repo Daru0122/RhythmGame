@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Judgement : MonoBehaviour
 {
+    //test
     int[] sndPerKey = new int[9];
     void Judge(int noteNum, Notescript noteScript, GameObject note){
         if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[1]){
