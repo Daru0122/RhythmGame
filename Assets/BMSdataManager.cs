@@ -8,6 +8,14 @@ using System.Text;
 
 public class BMSdataManager : MonoBehaviour
 {
+    public static float[] judgeTimings = new float[5]{
+        40,
+        80,
+        120,
+        140,
+        150
+    };
+    public static KeyCode[] keyBinds = new KeyCode[9];//키바인딩
     public List<Queue<GameObject>> Notes = new List<Queue<GameObject>>();
     public bool[] LNactive = new bool[20];
     public float[] LNtime = new float[20];
@@ -68,6 +76,16 @@ public class BMSdataManager : MonoBehaviour
     float output;//함수 호출시 출력
 
     void Start(){
+        //키바인딩-----------------------
+        keyBinds[0] = KeyCode.S;
+        keyBinds[1] = KeyCode.D;
+        keyBinds[2] = KeyCode.F;
+        keyBinds[3] = KeyCode.Space;
+        keyBinds[4] = KeyCode.J;
+        keyBinds[5] = KeyCode.LeftShift;
+        keyBinds[7] = KeyCode.K;
+        keyBinds[8] = KeyCode.L;
+        //---------------------------------------------------
         Notes.Add(new Queue<GameObject>());
         Notes.Add(new Queue<GameObject>());
         Notes.Add(new Queue<GameObject>());
@@ -343,7 +361,14 @@ public class BMSdataManager : MonoBehaviour
                             LNactive[noteType-51] = false;
                             nScript.EXtype = 2;
                             nScript.snd=0;
-                            nScript.LNtime = noteScroll-LNtime[noteType-51];//계산한 롱노트 시간 보냄
+                            GameObject LNmade = Instantiate(noteObj);
+                            Notescript LNscript = LNmade.GetComponent<Notescript>();
+                            LNscript.EXtype = 3;
+                            LNscript.scroll = LNtime[noteType-51];
+                            LNscript.snd=0;
+                            LNscript.noteType = noteType;
+                            LNscript.LNtime = noteScroll-LNtime[noteType-51];//계산한 롱노트 시간 보냄
+                            LNscript.lnEndnote = nScript.GetComponent<Notescript>();
                         }else{//아니면
                             LNactive[noteType-51] = true;
                             nScript.EXtype = 1;
@@ -353,14 +378,13 @@ public class BMSdataManager : MonoBehaviour
                         nScript.EXtype = 0;
                         Notes[noteType-11].Enqueue(noteMade);
                     }
-                    nScript.StartCoroutine(nScript.noteGo());
                 }else if(noteType.Equals(8)){//변속이라면
                     BPM = float.Parse(notes[i].noteValues);
                 }else if(noteType.Equals(4)){//BGA라면
                     VideoManager vManagerScript = videoObj.GetComponent<VideoManager>();
                     vManagerScript.time = noteTime;
                     vManagerScript.fileLoc = fileLoc+'/'+notes[i].noteValues;
-                    vManagerScript.StartCoroutine(vManagerScript.playVideo());
+                    StartCoroutine(vManagerScript.playVideo());
                 }
                 preNoteBeat = noteBeat;
                 i++;
@@ -374,7 +398,7 @@ public class BMSdataManager : MonoBehaviour
                 GameObject bar = Instantiate(barObj);
                 BarScript barscript = bar.GetComponent<BarScript>();
                 barscript.scroll = noteScroll;
-                barscript.StartCoroutine(barscript.barGO());
+                StartCoroutine(barscript.barGO());
                 while(currentbeat < Mathf.FloorToInt(noteBeat)){
                     noteTime += 240/BPM*scalePerMeasure[currentbeat];
                     noteScroll += 144000*scalePerMeasure[currentbeat]/174545;
@@ -382,13 +406,23 @@ public class BMSdataManager : MonoBehaviour
                     bar = Instantiate(barObj);
                     barscript = bar.GetComponent<BarScript>();
                     barscript.scroll = noteScroll;
-                    barscript.StartCoroutine(barscript.barGO());
+                    StartCoroutine(barscript.barGO());
                 }
                 preNoteBeat = currentbeat;
             }
         }
         loadDone = 1;
         Time.Start();
+        Judgement judge = gameObject.GetComponent<Judgement>();
+        StartCoroutine(judge.Judgement0());
+        StartCoroutine(judge.Judgement1());
+        StartCoroutine(judge.Judgement2());
+        StartCoroutine(judge.Judgement3());
+        StartCoroutine(judge.Judgement4());
+        StartCoroutine(judge.Judgement5());
+        StartCoroutine(judge.Judgement6());
+        StartCoroutine(judge.Judgement8());
+        StartCoroutine(judge.Judgement9());
     }
 }
 public struct Note{
