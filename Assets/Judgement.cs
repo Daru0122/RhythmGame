@@ -2,19 +2,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 키가 눌렸는지 반복확인하는 클래스
+/// </summary>
 public class Judgement : MonoBehaviour
 {
+    /// <summary>
+    /// 소리번호를 저장
+    /// </summary>
     int[] sndPerKey = new int[9];
+
+    /// <summary>
+    /// 키가눌렸는지 판단.
+    /// </summary>
+    /// <param name="noteNum">노트번호</param>
+    /// <param name="noteScript"></param>
+    /// <param name="note"></param>
     void Judge(int noteNum, Notescript noteScript, GameObject note){
+        //1. ...를 판다하고 ..를 한다.
         if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[1]){
             sndPerKey[noteNum] = noteScript.snd;
             Destroy(note);
             BMSdataManager.dManagerScript.Notes[noteNum].Dequeue();
         }
+        //2. .... 를 한다.
         if(noteScript.snd!=0){
             FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
         }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator Judgement0(){
         while(BMSdataManager.dManagerScript.Notes[0].Count > 0){
             yield return new WaitUntil(()=> Input.GetKey(BMSdataManager.keyBinds[0]));
