@@ -834,7 +834,39 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8d78eb3f-a8c1-4655-b26f-72adb32dd7f8
+    m_ActionName: Playing/Line1[/Keyboard/s]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a1863012-3423-49eb-9d17-dbc92cf4f46b
+    m_ActionName: Playing/Line2[/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ae9049e6-712b-47b9-9b3f-88a721816d58
+    m_ActionName: Playing/Line3[/Keyboard/f]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1385d743-d2cb-4daa-bdcc-7cb9bcefb9c7
+    m_ActionName: Playing/Line4[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e2bfe418-cda3-40b1-abd2-31b936f1dbaa
+    m_ActionName: Playing/Line5[/Keyboard/j]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c41a6345-81af-4074-8990-cd11899cb0dd
+    m_ActionName: Playing/Line6[/Keyboard/leftShift,/Keyboard/slash]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ca694f25-b923-4089-81de-bd2c9a9e3f5a
+    m_ActionName: Playing/Line8[/Keyboard/k]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 146e6041-877a-4f7f-a3f7-7f831da807c9
+    m_ActionName: Playing/Line9[/Keyboard/l]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Playing

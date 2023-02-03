@@ -8,6 +8,8 @@ using System.Text;
 
 public class BMSdataManager : MonoBehaviour
 {
+    private BGnotes currentBGM;
+    private Queue<BGnotes> BGMs = new Queue<BGnotes>();
     public float BPMchangeTime;
     public float BPMchangescroll;
     public static float[] judgeTimings = new float[5]{
@@ -350,7 +352,9 @@ public class BMSdataManager : MonoBehaviour
                 noteBeat = notes[i].noteBeat;
                 noteTime += (noteBeat-preNoteBeat)*240/BPM*scalePerMeasure[currentbeat];
                 noteScroll += (noteBeat-preNoteBeat)*144000/174545*scalePerMeasure[currentbeat];
-                if(noteType.Equals(1)||noteType>10){//배경음이나 노트라면
+                if(noteType.Equals(1)){
+                    BGMs.Enqueue(new BGnotes{noteTime=noteTime, noteSnd=WAV[int.Parse(notes[i].noteValues)]});
+                }else if(noteType>10){//노트라면
                     GameObject noteMade = Instantiate(noteObj);
                     Notescript nScript = noteMade.GetComponent<Notescript>();
                     nScript.time=noteTime;
@@ -376,7 +380,7 @@ public class BMSdataManager : MonoBehaviour
                             nScript.EXtype = 1;
                             LNtime[noteType-51] = noteScroll;//롱노트 시작부분 체크(거리계산 위해)
                         }
-                    }else if(!noteType.Equals(1)){
+                    }else{
                         nScript.EXtype = 0;
                         Notes[noteType-11].Enqueue(noteMade);
                     }
@@ -421,13 +425,28 @@ public class BMSdataManager : MonoBehaviour
         }
         Judgement judge = GameObject.Find("InputManager").GetComponent<Judgement>();
         StartCoroutine(judge.getFirstKeysound());
+        StartCoroutine(playBGM());
         BPM = firstBPM;
         loadDone = 1;
         Time.Start();
+    }
+    IEnumerator playBGM(){
+        currentBGM = BGMs.Dequeue();
+        while (BGMs.Count >= 0){
+            yield return new WaitForFixedUpdate();
+            while(currentBGM.noteTime*1000<=Time.ElapsedMilliseconds){
+                FMODUnity.RuntimeManager.CoreSystem.playSound(currentBGM.noteSnd, BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                currentBGM = BGMs.Dequeue();
+            }
+        }
     }
 }
 public struct Note{
     public float noteBeat;
     public string noteValues;
     public int noteType;
+}
+public struct BGnotes{
+    public float noteTime;
+    public FMOD.Sound noteSnd;
 }

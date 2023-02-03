@@ -147,6 +147,17 @@
                 },
                 {
                     "name": "",
+                    "id": "715063bc-3910-4ed1-9a31-74954d2b7389",
+                    "path": "<Keyboard>/slash",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Line6",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "c6534b15-593b-404f-a1bf-9b5b1be12102",
                     "path": "<Keyboard>/k",
                     "interactions": "",

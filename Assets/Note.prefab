@@ -97,6 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12b1fb5ea21331d4ea3e204aacce5a5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lnEndnote: {fileID: 0}
   time: 0
   scroll: 0
   snd: 0
@@ -116,3 +117,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 42b350ccc2cfc1546a0bd1d89bdc1961, type: 3}
   - {fileID: 21300000, guid: 703356c9d0896ac4e9ee84b237e39a19, type: 3}
   - {fileID: 21300000, guid: 09814aa666730d247aa5e43c32fa4410, type: 3}
+  - {fileID: 21300000, guid: b8923f592779d294c91157a3fb9de595, type: 3}
+  - {fileID: 21300000, guid: 6bdcad6e4e68b1c4ea7bc4f02e976b7c, type: 3}
+  - {fileID: 21300000, guid: 469befc2987143f4aae2bb7a1a250f1c, type: 3}
+  - {fileID: 21300000, guid: 6df0cc1e219049d48ad90fefc32bd5d2, type: 3}
+  - {fileID: 21300000, guid: b953ee9e437ff0d4c9d46e689683b5eb, type: 3}
+  - {fileID: 21300000, guid: 82805f6e9379bd44cab5b755120cf759, type: 3}
