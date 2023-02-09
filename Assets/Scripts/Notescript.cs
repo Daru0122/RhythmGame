@@ -81,7 +81,7 @@ public class Notescript : MonoBehaviour
                 x = BMSdataManager.noteLoc[noteType-10]+BMSdataManager.playAreaX;
                 sr.sprite = Notes[BMSdataManager.noteSprite[noteType-10]];
             }
-            if(EXtype!=3){
+            if(EXtype<3){
                 while(BMSdataManager.Time.Elapsed.TotalMilliseconds < time*1000+BMSdataManager.judgeTimings[4]){
                     yield return null;
                     tr.position = new Vector3(x,((scroll-BMSdataManager.totalScroll)*723)+357+y,0);

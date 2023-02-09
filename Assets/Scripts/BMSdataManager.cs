@@ -483,8 +483,8 @@ public class BMSdataManager : MonoBehaviour
                     nscript.noteType = 9;
                     nscript.time = noteTime;
                     nscript.scroll = noteScroll;
-                    nscript.LNtime = (float.Parse(notes[i].noteValues))/192*240/BPM*scalePerMeasure[currentbeat];
-                    noteTime += (float.Parse(notes[i].noteValues))/192*240/BPM*scalePerMeasure[currentbeat];
+                    nscript.LNtime = (float.Parse(notes[i].noteValues))/192*240/BPM;
+                    noteTime += (float.Parse(notes[i].noteValues))/192*240/BPM;
                 }
                 preNoteBeat = noteBeat;
                 i++;
