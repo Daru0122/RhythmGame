@@ -24,17 +24,24 @@ public class Notescript : MonoBehaviour
     IEnumerator noteGo(){
         yield return new WaitUntil(()=> BMSdataManager.dManagerScript.loadDone>=1);
         int lineNum = 0;
-        if(noteType.Equals(8)){
-            yield return new WaitUntil(()=> BMSdataManager.Time.ElapsedMilliseconds >= time*1000);
+        if(noteType.Equals(8)){//변속
+            yield return new WaitUntil(()=> BMSdataManager.Time.Elapsed.TotalMilliseconds >= time*1000);
             BMSdataManager.dManagerScript.BPM = LNtime;
             BMSdataManager.dManagerScript.BPMchangeTime = time;
             BMSdataManager.dManagerScript.BPMchangescroll = scroll;
+        }else if(noteType.Equals(9)){//STOP
+            yield return new WaitUntil(()=> BMSdataManager.Time.Elapsed.TotalMilliseconds >= time*1000);
+            BMSdataManager.dManagerScript.BPMchangescroll = scroll;
+            BMSdataManager.dManagerScript.STOPED = true;
+            yield return new WaitUntil(()=> BMSdataManager.Time.Elapsed.TotalMilliseconds >= (time+LNtime)*1000);
+            BMSdataManager.dManagerScript.BPMchangeTime = time+LNtime;
+            BMSdataManager.dManagerScript.STOPED = false;
         }else if(noteType>10){
             float x;
             float y = 0;
             if(EXtype>0){
                 lineNum = noteType-51;
-                x = BMSdataManager.noteLoc[noteType-50];
+                x = BMSdataManager.noteLoc[noteType-50]+BMSdataManager.playAreaX;
                 if(EXtype.Equals(1)){
                     sr.sprite = Notes[BMSdataManager.noteSprite[noteType-10]];//롱노트 시작부분일때
                 }else if(EXtype.Equals(2)){
@@ -71,11 +78,11 @@ public class Notescript : MonoBehaviour
                 }
             }else{
                 lineNum = noteType-11;
-                x = BMSdataManager.noteLoc[noteType-10];
+                x = BMSdataManager.noteLoc[noteType-10]+BMSdataManager.playAreaX;
                 sr.sprite = Notes[BMSdataManager.noteSprite[noteType-10]];
             }
             if(EXtype!=3){
-                while(BMSdataManager.Time.ElapsedMilliseconds < time*1000+BMSdataManager.judgeTimings[4]){
+                while(BMSdataManager.Time.Elapsed.TotalMilliseconds < time*1000+BMSdataManager.judgeTimings[4]){
                     yield return null;
                     tr.position = new Vector3(x,((scroll-BMSdataManager.totalScroll)*723)+357+y,0);
                 }

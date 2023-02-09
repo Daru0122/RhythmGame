@@ -10,7 +10,7 @@ public class BarScript : MonoBehaviour
         tr = gameObject.GetComponent<Transform>();
         while(BMSdataManager.totalScroll<scroll){
             yield return null;
-            tr.position = new Vector3(215.5f,((scroll-BMSdataManager.totalScroll)*723)+358.5f,0);
+            tr.position = new Vector3(215.5f+BMSdataManager.playAreaX,((scroll-BMSdataManager.totalScroll)*723)+358.5f,0);
         }
         Destroy(gameObject);
     }

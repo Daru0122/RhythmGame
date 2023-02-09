@@ -72,10 +72,28 @@ public class Judgement : MonoBehaviour
         GameObject note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
         Notescript noteScript = note.GetComponent<Notescript>();
         if(noteScript.noteType<50){
-            if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[1]){
-                sndPerKey[noteNum-1] = noteScript.snd;
+            if(noteScript.time*1000 <= BMSdataManager.Time.Elapsed.TotalMilliseconds+BMSdataManager.judgeTimings[0] && noteScript.time*1000 >= BMSdataManager.Time.Elapsed.TotalMilliseconds-BMSdataManager.judgeTimings[0]){
+                sndPerKey[noteNum-1] = noteScript.snd;//PG
                 Destroy(note);
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+                BMSdataManager.dManagerScript.playScore+=2;
+                BMSdataManager.dManagerScript.playCombo++;
+            }else if(noteScript.time*1000 <= BMSdataManager.Time.Elapsed.TotalMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.Elapsed.TotalMilliseconds-BMSdataManager.judgeTimings[1]){
+                sndPerKey[noteNum-1] = noteScript.snd;//GR
+                Destroy(note);
+                BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+                BMSdataManager.dManagerScript.playScore++;
+                BMSdataManager.dManagerScript.playCombo++;
+            }else if(noteScript.time*1000 <= BMSdataManager.Time.Elapsed.TotalMilliseconds+BMSdataManager.judgeTimings[2] && noteScript.time*1000 >= BMSdataManager.Time.Elapsed.TotalMilliseconds-BMSdataManager.judgeTimings[2]){
+                sndPerKey[noteNum-1] = noteScript.snd;//GD
+                Destroy(note);
+                BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+                BMSdataManager.dManagerScript.playCombo++;
+            }else if(noteScript.time*1000 <= BMSdataManager.Time.Elapsed.TotalMilliseconds+BMSdataManager.judgeTimings[3] && noteScript.time*1000 >= BMSdataManager.Time.Elapsed.TotalMilliseconds-BMSdataManager.judgeTimings[3]){
+                sndPerKey[noteNum-1] = noteScript.snd;//BD
+                Destroy(note);
+                BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+                BMSdataManager.dManagerScript.playCombo=0;
             }
             if(sndPerKey[noteNum-1]!=0){
                 FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
@@ -85,6 +103,7 @@ public class Judgement : MonoBehaviour
         }
     }
     IEnumerator LNjudge(int noteNum){
+        int saveJudge = 0;//0:poor,BD,1:PG,2:GR,3:GD
         if((noteNum).Equals(1)){
             Key = KeyAction.Playing.Line1;
         }else if((noteNum).Equals(2)){
@@ -102,11 +121,13 @@ public class Judgement : MonoBehaviour
         }else if((noteNum).Equals(9)){
             Key = KeyAction.Playing.Line9;
         }
-        GameObject note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
-        Notescript noteScript = note.GetComponent<Notescript>();
-        if(noteScript.noteType>50){
-            if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[1]){
-                sndPerKey[noteNum-1] = noteScript.snd;
+        GameObject note;
+        Notescript noteScript;
+        note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+        noteScript = note.GetComponent<Notescript>();
+        if(noteScript.time*1000 <= BMSdataManager.Time.Elapsed.TotalMilliseconds+BMSdataManager.judgeTimings[3] && noteScript.time*1000 >= BMSdataManager.Time.Elapsed.TotalMilliseconds-BMSdataManager.judgeTimings[3]){
+            if(noteScript.time*1000 <= BMSdataManager.Time.Elapsed.TotalMilliseconds+BMSdataManager.judgeTimings[0] && noteScript.time*1000 >= BMSdataManager.Time.Elapsed.TotalMilliseconds-BMSdataManager.judgeTimings[0]){
+                sndPerKey[noteNum-1] = noteScript.snd;//PG
                 Destroy(note);
                 if(sndPerKey[noteNum-1]!=0){
                 FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
@@ -115,22 +136,62 @@ public class Judgement : MonoBehaviour
                 note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
                 noteScript = note.GetComponent<Notescript>();
                 noteScript.EXtype = 4;
+                BMSdataManager.dManagerScript.playCombo++;
+                saveJudge = 1;
+            }else if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[1]){
+                sndPerKey[noteNum-1] = noteScript.snd;//GR
+                Destroy(note);
+                if(sndPerKey[noteNum-1]!=0){
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                }
+                BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+                note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                noteScript = note.GetComponent<Notescript>();
+                noteScript.EXtype = 4;
+                BMSdataManager.dManagerScript.playCombo++;
+                saveJudge = 2;
+            }else if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[2] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[2]){
+                sndPerKey[noteNum-1] = noteScript.snd;//GD
+                Destroy(note);
+                if(sndPerKey[noteNum-1]!=0){
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                }
+                BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+                note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                noteScript = note.GetComponent<Notescript>();
+                noteScript.EXtype = 4;
+                BMSdataManager.dManagerScript.playCombo++;
+                saveJudge = 3;
+            }else if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[3] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[3]){
+                sndPerKey[noteNum-1] = noteScript.snd;//BD
+                Destroy(note);
+                if(sndPerKey[noteNum-1]!=0){
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                }
+                BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+                note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                BMSdataManager.dManagerScript.playCombo=0;
+                saveJudge = 0;
+            }
+            if(!saveJudge.Equals(0)){
                 while(noteScript.time*1000>BMSdataManager.Time.ElapsedMilliseconds){
                     yield return new WaitForSeconds(15/BMSdataManager.dManagerScript.BPM);
                     if(Key.ReadValue<float>() > 0.5f){
-                        Debug.Log("눌림");
                         noteScript.EXtype = 4;
                     }else{
-                        Debug.Log("안눌림");
                         noteScript.EXtype = 2;
+                        saveJudge = 0;
                         break;
                         //롱놑미스
                     }
                 }
-                if(noteScript.time*1000<=BMSdataManager.Time.ElapsedMilliseconds){
-                    Destroy(note);
-                    BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
-                }
+            }
+            Destroy(note);
+            BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
+            if(saveJudge.Equals(1)){
+                BMSdataManager.dManagerScript.playScore+=2;
+            }else if(saveJudge.Equals(2)){
+                BMSdataManager.dManagerScript.playScore++;
             }
         }
     }

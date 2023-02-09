@@ -8,8 +8,16 @@ using System.Text;
 
 public class BMSdataManager : MonoBehaviour
 {
+    public static System.Diagnostics.Stopwatch Time = new System.Diagnostics.Stopwatch();//초시계
+    public static float playAreaX = 70;
+    //플레이중 저장되는 데이터들
+    public int playScore;
+    public int playCombo;
+    public int[] judgeCount = new int[5];
+    //------------
     private BGnotes currentBGM;
     private Queue<BGnotes> BGMs = new Queue<BGnotes>();
+    public bool STOPED;
     public float BPMchangeTime;
     public float BPMchangescroll;
     public static float[] judgeTimings = new float[5]{
@@ -47,8 +55,8 @@ public class BMSdataManager : MonoBehaviour
     public static Dictionary<string, string> BGA = new Dictionary<string, string>();//#BMPxx a 저장
     public static Dictionary<string, string> BPMs = new Dictionary<string, string>();//#BPMxx a 저장
     public static FMOD.Sound[] WAV = new FMOD.Sound[1296];//#WAVxx 파일 저장
-    public static string fileLoc = "C:/Program Files (x86)/Steam/steamapps/common/Qwilight/SavesDir/Bundle/Amnehilesie1108/Amnehilesie";//파일 위치 지정
-    public static System.Diagnostics.Stopwatch Time = new System.Diagnostics.Stopwatch();//초시계
+    public static string[] Stops = new string[1296];
+    public string fileLoc;//파일 위치 지정
     public static float totalScroll;
     //-------FMOD설정---------
     private FMOD.Sound snd;
@@ -74,12 +82,14 @@ public class BMSdataManager : MonoBehaviour
     int DIFFICULTY;
     float TOTAL;
     int LNTYPE;
+    string LNOBJ;
     //--------------------------------------------
     string input;
     string[] splitText;
-    float output;//함수 호출시 출력
+    int output;//함수 호출시 출력
 
     void Start(){
+        fileLoc = FileNameInput.value;
         //키바인딩-----------------------
         keyBinds[0] = KeyCode.S;
         keyBinds[1] = KeyCode.D;
@@ -147,10 +157,24 @@ public class BMSdataManager : MonoBehaviour
         noteLoc.Add(6,0);
         noteLoc.Add(8,338);
         noteLoc.Add(9,380);
-        StartCoroutine(BMSload());
+
+
+
+//로딩 시작---------------------------------------------------
+        BMSload(fileLoc);
+        //플레이
+        Judgement judge = GameObject.Find("InputManager").GetComponent<Judgement>();
+        StartCoroutine(judge.getFirstKeysound());
+        StartCoroutine(playBGM());
+        BPM = firstBPM;
+        Time.Start();
     }
     void Update(){
-        totalScroll = (Time.ElapsedMilliseconds-BPMchangeTime)*0.6f*BPM/174545+BPMchangescroll;
+        if(STOPED){
+            totalScroll=BPMchangescroll;
+        }else{
+            totalScroll = ((float)Time.Elapsed.TotalMilliseconds-BPMchangeTime*1000)*0.6f*BPM/174545+BPMchangescroll;
+        }
     }
     float convertFromThirysix(string value){//두자리수만 가능
         string[] convertToThirysix = new string[36]{
@@ -216,15 +240,14 @@ public class BMSdataManager : MonoBehaviour
         output = (16*(Array.IndexOf(convertToThirysix, value.Substring(0,1))) + (Array.IndexOf(convertToThirysix, value.Substring(1,1))));
         return output;
     }
-    IEnumerator BMSload(){//bms파일을 파싱
+    private void BMSload(string fileLocation){//bms파일을 파싱
         system = FMODUnity.RuntimeManager.CoreSystem;
-        yield return null;
         Debug.Log("로딩 시작");
         system.createChannelGroup (null, out channelGroup);
         channel.setChannelGroup(channelGroup);
 
         seps = new char[] {' ', ':'};//데이터 Split 기준 정함
-        StreamReader reader = new StreamReader(new FileStream(fileLoc+"/amnehilasieSPN.bms", FileMode.Open), Encoding.GetEncoding("shift_jis"));
+        StreamReader reader = new StreamReader(new FileStream(fileLocation, FileMode.Open), Encoding.GetEncoding("shift_jis"));
         while (!reader.EndOfStream){
             input = reader.ReadLine();
             if(input.Length >= 4 && !input.StartsWith("*")){
@@ -259,28 +282,38 @@ public class BMSdataManager : MonoBehaviour
                 }else if(splitText[0].Equals("#TOTAL")){
                     TOTAL = float.Parse(input.Substring(input.IndexOf(" ")+1));
                 }else if(splitText[0].Equals("#PLAYER")){
+                    PLAYER = int.Parse(input.Substring(input.IndexOf(" ")+1));
+                }else if(splitText[0].Equals("#LNTYPE")){//https://nvyu.net/rdm/rby_ex.php
                     LNTYPE = int.Parse(input.Substring(input.IndexOf(" ")+1));
+                }else if(splitText[0].Equals("#LNOBJ")){//LNOBG형 롱노트 발견
+                    LNOBJ = input.Substring(input.IndexOf(" ")+1);
+                    LNTYPE = 3;//LNTYPE과 LNOBJ는 함꼐 쓰일 수 없음
+                }else if(input.Substring(1,4) == "STOP"){//STOP 발견
+                    convertFromThirysix(input.Substring(5,2));
+                    Stops[output] = splitText[1];
                 }//-----------------------------WAV----------------------------
                 else if(input.Substring(1,3) == "WAV"){
-                    if(File.Exists(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".ogg")){//ogg파일 존재여부
-                        system.createSound(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".ogg", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
-                    }else if(File.Exists(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".wav")){//wav파일 존재여부
-                        system.createSound(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".wav", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
-                    }else if(File.Exists(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".mp3")){//mp3파일 존재여부
-                        system.createSound(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".mp3", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
+                    if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".ogg")){//ogg파일 존재여부
+                        system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".ogg", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
+                    }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".wav")){//wav파일 존재여부
+                        system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".wav", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
+                    }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mp3")){//mp3파일 존재여부
+                        system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mp3", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
                     }else{
-                        Debug.Log("오디오파일 발견 불가");
+                        Debug.Log("오디오파일 발견 불가"+input.Substring(7));
                     }
                     convertFromThirysix(input.Substring(4,2));
-                    WAV[(int)output] = snd;
+                    WAV[output] = snd;
                 }//----------------------------BGA---------------------
                 else if(input.Substring(1,3) == "BMP"){
-                    if(File.Exists(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".mp4")){//mp4파일 존재여부
-                        BGA.Add(input.Substring(4,2), Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".mp4");
-                    }else if(File.Exists(fileLoc+'/'+Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".wmv")){//wmv파일 존재여부
-                        BGA.Add(input.Substring(4,2), Path.GetFileNameWithoutExtension(input.Substring(input.IndexOf(" ")+1))+".wmv");
+                    if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mp4")){//mp4파일 존재여부
+                        BGA.Add(input.Substring(4,2), Path.GetFileNameWithoutExtension(input.Substring(7))+".mp4");
+                    }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".wmv")){//wmv파일 존재여부
+                        BGA.Add(input.Substring(4,2), Path.GetFileNameWithoutExtension(input.Substring(7))+".wmv");
+                    }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mpeg")){//mpeg파일 존재여부
+                        BGA.Add(input.Substring(4,2), Path.GetFileNameWithoutExtension(input.Substring(7))+".mpeg");
                     }else{
-                        Debug.Log("bga파일 발견 불가");
+                        Debug.Log("bga파일 발견 불가"+input.Substring(7));
                     }
                 }//------------------------BPM---------------
                 else if(input.Substring(1,3) == "BPM"){
@@ -298,7 +331,7 @@ public class BMSdataManager : MonoBehaviour
                             }
                         }
                     }else if(noteType.Equals(2)){//마디별 크기---------------------------------------------------------------------
-                        while(scalePerMeasure.Count < int.Parse(input.Split(':')[0].Substring(1,3))){
+                        while(scalePerMeasure.Count < int.Parse(input.Substring(1,3))){
                             scalePerMeasure.Add(1);//빈마디는 1로 채워넣고
                         }
                         scalePerMeasure.Add(float.Parse(noteData));//현제 마디에 해당하는 값 넣기
@@ -306,7 +339,7 @@ public class BMSdataManager : MonoBehaviour
                         for(int i = 0; noteData.Length > i*2; i++){
                             if(noteData.Substring(i*2,2) != "00"){
                                 convertFromSixteen(noteData.Substring(i*2,2));//옛날 BPM변속은 16진수(16*16-1=255)
-                                notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=8,noteValues=output.ToString()});//모두 신식 변속으로 변경
+                                notes.Add(new Note{noteBeat=(currentMeasure+(2*i/(float)noteData.Length)), noteType=8,noteValues=output.ToString()});//모두 신식 변속으로 변경
                             }
                         }
                     }else if(noteType.Equals(4)){//BGA------------------------------------------------------------
@@ -325,14 +358,58 @@ public class BMSdataManager : MonoBehaviour
                     }else if(noteType.Equals(8)){//BPM변속(신식)------------------------------------------------------------------
                         for(int i = 0; noteData.Length > i*2; i++){
                             if(noteData.Substring(i*2,2) != "00"){
-                                notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=8,noteValues=BPMs[noteData.Substring(i*2,2)]});
+                                notes.Add(new Note{noteBeat=(currentMeasure+(2*i/(float)noteData.Length)), noteType=8,noteValues=BPMs[noteData.Substring(i*2,2)]});
                             }
                         }
-                    }else if (noteType > 10){//노트들--------------------------------------------------------------------------------
+                    }else if(noteType.Equals(9)){//STOP------------------------------------------------------------------
                         for(int i = 0; noteData.Length > i*2; i++){
                             if(noteData.Substring(i*2,2) != "00"){
                                 convertFromThirysix(noteData.Substring(i*2,2));
-                                notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
+                                notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=9,noteValues=Stops[output]});
+                            }
+                        }
+                    }else if (noteType > 10){//노트들--------------------------------------------------------------------------------
+                        if(LNTYPE.Equals(2)){
+                            string currentValue = "00";
+                            for(int i = 0; noteData.Length > i*2;){
+                                if(noteData.Substring(i*2,2) != "00"){
+                                    currentValue = noteData.Substring(i*2,2);
+                                    convertFromThirysix(noteData.Substring(i*2,2));
+                                    notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
+                                    i++;
+                                    if(currentValue.Equals(noteData.Substring(i*2,2))){
+                                        notes.RemoveAt(notes.Count-1);
+                                        notes.Add(new Note{noteBeat=currentMeasure+(2*(i-1)/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
+                                        i++;
+                                        while(currentValue.Equals(noteData.Substring(i*2,2))){
+                                            i++;
+                                        }
+                                        notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
+                                        i++;
+                                    }
+                                }
+                            }
+                        }else if(LNTYPE.Equals(3)){
+                            int preMeasure = 0;
+                            for(int i = 0; noteData.Length > i*2; i++){
+                                if(noteData.Substring(i*2,2) != "00"){
+                                    if(noteData.Substring(i*2,2).Equals(LNOBJ)){
+                                        int loc= notes.FindLastIndex(x => x.noteType==noteType);
+                                        notes[loc] = new Note{noteBeat=notes[loc].noteBeat, noteType=notes[loc].noteType+40, noteValues=notes[loc].noteValues};
+                                        notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
+                                    }else{
+                                        preMeasure = i;
+                                        convertFromThirysix(noteData.Substring(i*2,2));
+                                        notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
+                                    }
+                                }
+                            }
+                        }else{
+                            for(int i = 0; noteData.Length > i*2; i++){
+                                if(noteData.Substring(i*2,2) != "00"){
+                                    convertFromThirysix(noteData.Substring(i*2,2));
+                                    notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
+                                }
                             }
                         }
                     }
@@ -341,6 +418,9 @@ public class BMSdataManager : MonoBehaviour
         }
         reader.Close();
         notes.Sort((x,y) => x.noteBeat.CompareTo(y.noteBeat));
+        while(scalePerMeasure.Count < notes[notes.Count-1].noteBeat+1){
+            scalePerMeasure.Add(1);
+        }
         float noteBeat = 0;
         float preNoteBeat = 0;
         float noteTime = 0f;
@@ -395,8 +475,16 @@ public class BMSdataManager : MonoBehaviour
                 }else if(noteType.Equals(4)){//BGA라면
                     VideoManager vManagerScript = videoObj.GetComponent<VideoManager>();
                     vManagerScript.time = noteTime;
-                    vManagerScript.fileLoc = fileLoc+'/'+notes[i].noteValues;
+                    vManagerScript.fileLoc = Path.GetDirectoryName(fileLocation)+'/'+notes[i].noteValues;
                     StartCoroutine(vManagerScript.playVideo());
+                }else if(noteType.Equals(9)){//STOP이라면
+                    GameObject notemade = Instantiate(noteObj);
+                    Notescript nscript = notemade.GetComponent<Notescript>();
+                    nscript.noteType = 9;
+                    nscript.time = noteTime;
+                    nscript.scroll = noteScroll;
+                    nscript.LNtime = (float.Parse(notes[i].noteValues))/192*240/BPM*scalePerMeasure[currentbeat];
+                    noteTime += (float.Parse(notes[i].noteValues))/192*240/BPM*scalePerMeasure[currentbeat];
                 }
                 preNoteBeat = noteBeat;
                 i++;
@@ -423,20 +511,19 @@ public class BMSdataManager : MonoBehaviour
                 preNoteBeat = currentbeat;
             }
         }
-        Judgement judge = GameObject.Find("InputManager").GetComponent<Judgement>();
-        StartCoroutine(judge.getFirstKeysound());
-        StartCoroutine(playBGM());
-        BPM = firstBPM;
         loadDone = 1;
-        Time.Start();
     }
     IEnumerator playBGM(){
-        currentBGM = BGMs.Dequeue();
-        while (BGMs.Count >= 0){
+        currentBGM = BGMs.Peek();
+        while (BGMs.Count > 0){
             yield return new WaitForFixedUpdate();
-            while(currentBGM.noteTime*1000<=Time.ElapsedMilliseconds){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(currentBGM.noteSnd, BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+            if(currentBGM.noteTime*1000<=Time.Elapsed.TotalMilliseconds){
                 currentBGM = BGMs.Dequeue();
+                FMODUnity.RuntimeManager.CoreSystem.playSound(currentBGM.noteSnd, BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                if(BGMs.Count <= 0){
+                    break;
+                }
+                currentBGM = BGMs.Peek();
             }
         }
     }
