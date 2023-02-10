@@ -5,16 +5,20 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 
-public class FileNameInput : MonoBehaviour
+public class Menu : MonoBehaviour
 {
     public TMP_InputField field;
     public static string value;
     void Awake(){
         value = field.text;
     }
-    public void Onbutton()
+    public void OnStartbutton()
     {
         value = field.text.Replace("\\","/");
         SceneManager.LoadScene("Play");
+    }
+    public void OnSettingbutton()
+    {
+        SceneManager.LoadScene("Setting");
     }
 }

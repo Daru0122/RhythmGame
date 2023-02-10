@@ -89,7 +89,7 @@ public class BMSdataManager : MonoBehaviour
     int output;//함수 호출시 출력
 
     void Start(){
-        fileLoc = FileNameInput.value;
+        fileLoc = Menu.value;
         //키바인딩-----------------------
         keyBinds[0] = KeyCode.S;
         keyBinds[1] = KeyCode.D;
@@ -242,7 +242,6 @@ public class BMSdataManager : MonoBehaviour
     }
     private void BMSload(string fileLocation){//bms파일을 파싱
         system = FMODUnity.RuntimeManager.CoreSystem;
-        Debug.Log("로딩 시작");
         system.createChannelGroup (null, out channelGroup);
         channel.setChannelGroup(channelGroup);
 
@@ -299,8 +298,6 @@ public class BMSdataManager : MonoBehaviour
                         system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".wav", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
                     }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mp3")){//mp3파일 존재여부
                         system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mp3", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
-                    }else{
-                        Debug.Log("오디오파일 발견 불가"+input.Substring(7));
                     }
                     convertFromThirysix(input.Substring(4,2));
                     WAV[output] = snd;
@@ -312,8 +309,6 @@ public class BMSdataManager : MonoBehaviour
                         BGA.Add(input.Substring(4,2), Path.GetFileNameWithoutExtension(input.Substring(7))+".wmv");
                     }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mpeg")){//mpeg파일 존재여부
                         BGA.Add(input.Substring(4,2), Path.GetFileNameWithoutExtension(input.Substring(7))+".mpeg");
-                    }else{
-                        Debug.Log("bga파일 발견 불가"+input.Substring(7));
                     }
                 }//------------------------BPM---------------
                 else if(input.Substring(1,3) == "BPM"){
