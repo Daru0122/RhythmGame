@@ -8,6 +8,7 @@ using System.Text;
 
 public class BMSdataManager : MonoBehaviour
 {
+    FMOD.RESULT result;
     public static System.Diagnostics.Stopwatch Time = new System.Diagnostics.Stopwatch();//초시계
     public static float playAreaX = 70;
     //플레이중 저장되는 데이터들
@@ -61,7 +62,7 @@ public class BMSdataManager : MonoBehaviour
     //-------FMOD설정---------
     private FMOD.Sound snd;
     FMOD.System system;
-    public static FMOD.Channel channel;
+    public static FMOD.Channel[] channel = new FMOD.Channel[1296];
     public static FMOD.ChannelGroup channelGroup;
     //------------------------
     //HEADER FILED 선언
@@ -242,11 +243,12 @@ public class BMSdataManager : MonoBehaviour
     }
     private void BMSload(string fileLocation){//bms파일을 파싱
         system = FMODUnity.RuntimeManager.CoreSystem;
-        system.createChannelGroup (null, out channelGroup);
-        channel.setChannelGroup(channelGroup);
-
+        system.close();
+        system.setSoftwareChannels(1296);
+        system.init(1296,FMOD.INITFLAGS.NORMAL, new IntPtr(0));
+        system.getMasterChannelGroup(out channelGroup);
         seps = new char[] {' ', ':'};//데이터 Split 기준 정함
-        StreamReader reader = new StreamReader(new FileStream(fileLocation, FileMode.Open), Encoding.GetEncoding("shift_jis"));
+        StreamReader reader = new StreamReader(new FileStream(fileLocation, FileMode.Open), Encoding.GetEncoding(932));
         while (!reader.EndOfStream){
             input = reader.ReadLine();
             if(input.Length >= 4 && !input.StartsWith("*")){
@@ -293,10 +295,13 @@ public class BMSdataManager : MonoBehaviour
                 }//-----------------------------WAV----------------------------
                 else if(input.Substring(1,3) == "WAV"){
                     if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".ogg")){//ogg파일 존재여부
+                        Debug.Log(Path.GetFileNameWithoutExtension(input.Substring(7))+".ogg");
                         system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".ogg", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
                     }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".wav")){//wav파일 존재여부
+                        Debug.Log(Path.GetFileNameWithoutExtension(input.Substring(7))+".wav");
                         system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".wav", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
                     }else if(File.Exists(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mp3")){//mp3파일 존재여부
+                        Debug.Log(Path.GetFileNameWithoutExtension(input.Substring(7))+".mp3");
                         system.createSound(Path.GetDirectoryName(fileLocation)+'/'+Path.GetFileNameWithoutExtension(input.Substring(7))+".mp3", FMOD.MODE.CREATESAMPLE | FMOD.MODE.ACCURATETIME, out snd);
                     }
                     convertFromThirysix(input.Substring(4,2));
@@ -514,7 +519,8 @@ public class BMSdataManager : MonoBehaviour
             yield return new WaitForFixedUpdate();
             if(currentBGM.noteTime*1000<=Time.Elapsed.TotalMilliseconds){
                 currentBGM = BGMs.Dequeue();
-                FMODUnity.RuntimeManager.CoreSystem.playSound(currentBGM.noteSnd, BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                channel[Array.IndexOf(WAV, currentBGM.noteSnd)].stop();
+                FMODUnity.RuntimeManager.CoreSystem.playSound(currentBGM.noteSnd, channelGroup, false, out channel[Array.IndexOf(WAV, currentBGM.noteSnd)]);
                 if(BGMs.Count <= 0){
                     break;
                 }

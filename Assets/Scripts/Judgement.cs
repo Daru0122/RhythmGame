@@ -96,7 +96,8 @@ public class Judgement : MonoBehaviour
                 BMSdataManager.dManagerScript.playCombo=0;
             }
             if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                BMSdataManager.channel[sndPerKey[noteNum-1]].stop();
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
             }
         }else{
             StartCoroutine(LNjudge(noteNum));
@@ -130,7 +131,7 @@ public class Judgement : MonoBehaviour
                 sndPerKey[noteNum-1] = noteScript.snd;//PG
                 Destroy(note);
                 if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
                 note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
@@ -142,7 +143,7 @@ public class Judgement : MonoBehaviour
                 sndPerKey[noteNum-1] = noteScript.snd;//GR
                 Destroy(note);
                 if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
                 note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
@@ -154,7 +155,7 @@ public class Judgement : MonoBehaviour
                 sndPerKey[noteNum-1] = noteScript.snd;//GD
                 Destroy(note);
                 if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
                 note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
@@ -166,7 +167,7 @@ public class Judgement : MonoBehaviour
                 sndPerKey[noteNum-1] = noteScript.snd;//BD
                 Destroy(note);
                 if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel);
+                FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
                 note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
