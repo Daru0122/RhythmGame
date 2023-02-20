@@ -626,12 +626,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 493649c4ba4dd6146bcc697923763a99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HISPEED: 2
   playScore: 0
   playCombo: 0
   judgeCount: 0000000000000000000000000000000000000000
+  STOPED: 0
   BPMchangeTime: 0
   BPMchangescroll: 0
-  Canvas: {fileID: 0}
   LNactive: 0000000000000000000000000000000000000000
   LNtime:
   - 0
@@ -659,6 +660,7 @@ MonoBehaviour:
   noteObj: {fileID: 1580930606494118659, guid: 49618914fb26e5b429399d87cf18a83c, type: 3}
   videoObj: {fileID: 65244226}
   scalePerMeasure: []
+  fileLoc: 
   firstBPM: 0
   BPM: 0
 --- !u!4 &961491753
@@ -779,7 +781,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1611308294}
   - component: {fileID: 1611308292}
-  - component: {fileID: 1611308295}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -814,68 +815,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1611308295
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1611308291}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 276c9a9061e9bfe43940ac14b376d1b6, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 1065353364}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents:
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 8d78eb3f-a8c1-4655-b26f-72adb32dd7f8
-    m_ActionName: Playing/Line1[/Keyboard/s]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: a1863012-3423-49eb-9d17-dbc92cf4f46b
-    m_ActionName: Playing/Line2[/Keyboard/d]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: ae9049e6-712b-47b9-9b3f-88a721816d58
-    m_ActionName: Playing/Line3[/Keyboard/f]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 1385d743-d2cb-4daa-bdcc-7cb9bcefb9c7
-    m_ActionName: Playing/Line4[/Keyboard/space]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: e2bfe418-cda3-40b1-abd2-31b936f1dbaa
-    m_ActionName: Playing/Line5[/Keyboard/j]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: c41a6345-81af-4074-8990-cd11899cb0dd
-    m_ActionName: Playing/Line6[/Keyboard/leftShift,/Keyboard/slash]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: ca694f25-b923-4089-81de-bd2c9a9e3f5a
-    m_ActionName: Playing/Line8[/Keyboard/k]
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 146e6041-877a-4f7f-a3f7-7f831da807c9
-    m_ActionName: Playing/Line9[/Keyboard/l]
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: Playing
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 519420031}
 --- !u!1 &1898349442
 GameObject:
   m_ObjectHideFlags: 0

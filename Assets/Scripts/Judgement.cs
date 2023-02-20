@@ -4,59 +4,97 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class Judgement : MonoBehaviour
 {
+    private int[] sndPerKey = new int[9];
     private InputAction Key;
     public MainKeys KeyAction;
+    private bool[] KeyActived = new bool[9];
     private void OnEnable() {
         if (KeyAction == null){
             KeyAction = new MainKeys();
         }
         KeyAction.Playing.Enable();
     }
+    private void Update() {//functionKeys
+        if(Input.GetKeyDown(KeyCode.F1)){
+            BMSdataManager.dManagerScript.HISPEED-=0.5f;
+        }if(Input.GetKeyDown(KeyCode.F2)){
+            BMSdataManager.dManagerScript.HISPEED+=0.5f;
+        }
+    }
+    public IEnumerator JudgeUpdate() {
+        while(true){
+            yield return new WaitForFixedUpdate();
+            InputSystem.Update();
+            if(KeyAction.Playing.Line1.ReadValue<float>()>0){
+                if(KeyActived[0]){
+                    Judge(1);
+                    KeyActived[0]=false;
+                }
+            }else{
+                KeyActived[0]=true;
+            }
+            if(KeyAction.Playing.Line2.ReadValue<float>()>0){
+                if(KeyActived[1]){
+                    Judge(2);
+                    KeyActived[1]=false;
+                }
+            }else{
+                KeyActived[1]=true;
+            }
+            if(KeyAction.Playing.Line3.ReadValue<float>()>0){
+                if(KeyActived[2]){
+                    Judge(3);
+                    KeyActived[2]=false;
+                }
+            }else{
+                KeyActived[2]=true;
+            }
+            if(KeyAction.Playing.Line4.ReadValue<float>()>0){
+                if(KeyActived[3]){
+                    Judge(4);
+                    KeyActived[3]=false;
+                }
+            }else{
+                KeyActived[3]=true;
+            }
+            if(KeyAction.Playing.Line5.ReadValue<float>()>0){
+                if(KeyActived[4]){
+                    Judge(5);
+                    KeyActived[4]=false;
+                }
+            }else{
+                KeyActived[4]=true;
+            }
+            if(KeyAction.Playing.Line6.ReadValue<float>()>0){
+                if(KeyActived[5]){
+                    Judge(6);
+                    KeyActived[5]=false;
+                }
+            }else{
+                KeyActived[5]=true;
+            }
+            if(KeyAction.Playing.Line8.ReadValue<float>()>0){
+                if(KeyActived[7]){
+                    Judge(8);
+                    KeyActived[7]=false;
+                }
+            }else{
+                KeyActived[7]=true;
+            }
+            if(KeyAction.Playing.Line9.ReadValue<float>()>0){
+                if(KeyActived[8]){
+                    Judge(9);
+                    KeyActived[8]=false;
+                }
+            }else{
+                KeyActived[8]=true;
+            }
+        }
+    }
     public void OnDisable()
     {
         KeyAction.Playing.Disable();
     }
-    private void OnLine1(){
-        if(BMSdataManager.dManagerScript.Notes[0].Count > 0){
-            Judge(1);
-        }
-    }
-    private void OnLine2(){
-        if(BMSdataManager.dManagerScript.Notes[1].Count > 0){
-            Judge(2);
-        }
-    }
-    private void OnLine3(){
-        if(BMSdataManager.dManagerScript.Notes[2].Count > 0){
-            Judge(3);
-        }
-    }
-    private void OnLine4(){
-        if(BMSdataManager.dManagerScript.Notes[3].Count > 0){
-            Judge(4);
-        }
-    }
-    private void OnLine5(){
-        if(BMSdataManager.dManagerScript.Notes[4].Count > 0){
-            Judge(5);
-        }
-    }
-    private void OnLine6(){
-        if(BMSdataManager.dManagerScript.Notes[5].Count > 0){
-            Judge(6);
-        }
-    }
-    private void OnLine8(){
-        if(BMSdataManager.dManagerScript.Notes[7].Count > 0){
-            Judge(8);
-        }
-    }
-    private void OnLine9(){
-        if(BMSdataManager.dManagerScript.Notes[8].Count > 0){
-            Judge(9);
-        }
-    }
-    private int[] sndPerKey = new int[9];
     public IEnumerator getFirstKeysound(){//첫키음을 받아냄
         yield return new WaitUntil(()=> BMSdataManager.dManagerScript.loadDone >= 0);
         sndPerKey[0] = BMSdataManager.dManagerScript.Notes[0].Peek().GetComponent<Notescript>().snd;
@@ -124,6 +162,8 @@ public class Judgement : MonoBehaviour
         }
         GameObject note;
         Notescript noteScript;
+        GameObject Endnote;
+        Notescript EndnoteScript;
         note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
         noteScript = note.GetComponent<Notescript>();
         if(noteScript.time*1000 <= BMSdataManager.Time.Elapsed.TotalMilliseconds+BMSdataManager.judgeTimings[3] && noteScript.time*1000 >= BMSdataManager.Time.Elapsed.TotalMilliseconds-BMSdataManager.judgeTimings[3]){
@@ -134,9 +174,9 @@ public class Judgement : MonoBehaviour
                 FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
-                note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
-                noteScript = note.GetComponent<Notescript>();
-                noteScript.EXtype = 4;
+                Endnote = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                EndnoteScript = Endnote.GetComponent<Notescript>();
+                EndnoteScript.EXtype = 4;
                 BMSdataManager.dManagerScript.playCombo++;
                 saveJudge = 1;
             }else if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[1] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[1]){
@@ -146,9 +186,9 @@ public class Judgement : MonoBehaviour
                 FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
-                note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
-                noteScript = note.GetComponent<Notescript>();
-                noteScript.EXtype = 4;
+                Endnote = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                EndnoteScript = Endnote.GetComponent<Notescript>();
+                EndnoteScript.EXtype = 4;
                 BMSdataManager.dManagerScript.playCombo++;
                 saveJudge = 2;
             }else if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[2] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[2]){
@@ -158,27 +198,30 @@ public class Judgement : MonoBehaviour
                 FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
-                note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
-                noteScript = note.GetComponent<Notescript>();
-                noteScript.EXtype = 4;
+                Endnote = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                EndnoteScript = Endnote.GetComponent<Notescript>();
+                EndnoteScript.EXtype = 4;
                 BMSdataManager.dManagerScript.playCombo++;
                 saveJudge = 3;
-            }else if(noteScript.time*1000 <= BMSdataManager.Time.ElapsedMilliseconds+BMSdataManager.judgeTimings[3] && noteScript.time*1000 >= BMSdataManager.Time.ElapsedMilliseconds-BMSdataManager.judgeTimings[3]){
+            }else{
                 sndPerKey[noteNum-1] = noteScript.snd;//BD
                 Destroy(note);
                 if(sndPerKey[noteNum-1]!=0){
                 FMODUnity.RuntimeManager.CoreSystem.playSound(BMSdataManager.WAV[sndPerKey[noteNum-1]], BMSdataManager.channelGroup, false, out BMSdataManager.channel[sndPerKey[noteNum-1]]);
                 }
                 BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
-                note = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                Endnote = BMSdataManager.dManagerScript.Notes[noteNum-1].Peek();
+                EndnoteScript = Endnote.GetComponent<Notescript>();
                 BMSdataManager.dManagerScript.playCombo=0;
                 saveJudge = 0;
             }
             if(!saveJudge.Equals(0)){
-                while(noteScript.time*1000>BMSdataManager.Time.ElapsedMilliseconds){
-                    yield return new WaitForSeconds(15/BMSdataManager.dManagerScript.BPM);
-                    if(Key.ReadValue<float>() > 0.5f){
+                float tickTime=15/BMSdataManager.dManagerScript.BPM;
+                while(EndnoteScript.time*1000>BMSdataManager.Time.ElapsedMilliseconds-(15/BMSdataManager.dManagerScript.BPM)){
+                    yield return new WaitUntil(()=>BMSdataManager.Time.ElapsedMilliseconds>=noteScript.time+tickTime);
+                    if(Key.ReadValue<float>() > 0){
                         noteScript.EXtype = 4;
+                        tickTime+=15/BMSdataManager.dManagerScript.BPM;
                     }else{
                         noteScript.EXtype = 2;
                         saveJudge = 0;
@@ -187,7 +230,8 @@ public class Judgement : MonoBehaviour
                     }
                 }
             }
-            Destroy(note);
+            yield return new WaitUntil(()=>EndnoteScript.time*1000<=BMSdataManager.Time.ElapsedMilliseconds);
+            Destroy(Endnote);
             BMSdataManager.dManagerScript.Notes[noteNum-1].Dequeue();
             if(saveJudge.Equals(1)){
                 BMSdataManager.dManagerScript.playScore+=2;

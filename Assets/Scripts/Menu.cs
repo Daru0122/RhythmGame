@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class Menu : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class Menu : MonoBehaviour
     public static string value;
     void Awake(){
         value = field.text;
+    }
+    private void FixedUpdate() {
+        InputSystem.Update();
     }
     public void OnStartbutton()
     {

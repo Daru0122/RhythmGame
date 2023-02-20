@@ -55,8 +55,8 @@ public class Notescript : MonoBehaviour
                     while (BMSdataManager.totalScroll < LNtime+scroll){
                         yield return null;
                         if(!lnEndnote.EXtype.Equals(4)){//롱노트 눌리면 4로 바뀔거임
-                            tr.position = new Vector3(x,((scroll-BMSdataManager.totalScroll)*723)+357,0);
-                            tr.localScale = new Vector3(1,LNtime*723,1);
+                            tr.position = new Vector3(x,((scroll-BMSdataManager.totalScroll)*723*BMSdataManager.dManagerScript.HISPEED)+357,0);
+                            tr.localScale = new Vector3(1,LNtime*723*BMSdataManager.dManagerScript.HISPEED,1);
                             sr.sprite = Notes[BMSdataManager.noteSprite[noteType+190]];
                         }else{
                             if(LNanimPro<20){
@@ -71,7 +71,7 @@ public class Notescript : MonoBehaviour
                                 LNanimPro=0;
                             }
                             tr.position = new Vector3(x,357,0);
-                            tr.localScale = new Vector3(1,(scroll+LNtime-BMSdataManager.totalScroll)*723,1);
+                            tr.localScale = new Vector3(1,(scroll+LNtime-BMSdataManager.totalScroll)*723*BMSdataManager.dManagerScript.HISPEED,1);
                         }
                     }
                     Destroy(gameObject);
@@ -81,10 +81,10 @@ public class Notescript : MonoBehaviour
                 x = BMSdataManager.noteLoc[noteType-10]+BMSdataManager.playAreaX;
                 sr.sprite = Notes[BMSdataManager.noteSprite[noteType-10]];
             }
-            if(EXtype<3){
+            if(EXtype!=3){
                 while(BMSdataManager.Time.Elapsed.TotalMilliseconds < time*1000+BMSdataManager.judgeTimings[4]){
                     yield return null;
-                    tr.position = new Vector3(x,((scroll-BMSdataManager.totalScroll)*723)+357+y,0);
+                    tr.position = new Vector3(x,((scroll-BMSdataManager.totalScroll)*723*BMSdataManager.dManagerScript.HISPEED)+357+y,0);
                 }
                 Destroy(gameObject);
                 BMSdataManager.dManagerScript.Notes[lineNum].Dequeue();
