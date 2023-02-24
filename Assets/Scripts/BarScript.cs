@@ -8,9 +8,9 @@ public class BarScript : MonoBehaviour
     public float scroll;
     public IEnumerator barGO(){
         tr = gameObject.GetComponent<Transform>();
-        while(BMSdataManager.totalScroll<scroll){
+        while(Player.totalScroll<scroll){
             yield return null;
-            tr.position = new Vector3(215.5f+BMSdataManager.playAreaX,((scroll-BMSdataManager.totalScroll)*723*BMSdataManager.dManagerScript.HISPEED)+358.5f,0);
+            tr.position = new Vector3(215.5f+dataManager.playAreaX,((scroll-Player.totalScroll)*723*Player.HISPEED)+358.5f,0);
         }
         Destroy(gameObject);
     }

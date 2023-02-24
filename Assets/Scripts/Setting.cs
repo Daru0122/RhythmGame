@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
-using UnityEngine.InputSystem;
 
 public class Setting : MonoBehaviour
 {
@@ -18,9 +17,6 @@ public class Setting : MonoBehaviour
         SndSystem = FMODUnity.RuntimeManager.CoreSystem;
         refreshResolutionMenu();
         refreshSndDrivers();
-    }
-    private void FixedUpdate() {
-        InputSystem.Update();
     }
     private void refreshResolutionMenu(){
         res.AddRange(Screen.resolutions);
