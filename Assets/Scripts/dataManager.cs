@@ -7,7 +7,7 @@ using System.Text;
 
 public class dataManager : MonoBehaviour
 {
-    public List<Note> notes = new List<Note>();
+    public List<preNote> notes = new List<preNote>();
     private StreamReader reader;
     FMOD.RESULT result;
     public static float playAreaX = 70;
@@ -87,50 +87,50 @@ public class dataManager : MonoBehaviour
         //---------------------------------------------------
 
         //일반노트 스프라이트
-        noteSprite.Add(1, 1);
-        noteSprite.Add(2, 2);
-        noteSprite.Add(3, 1);
-        noteSprite.Add(4, 2);
-        noteSprite.Add(5, 1);
-        noteSprite.Add(6, 0);
-        noteSprite.Add(8, 2);
-        noteSprite.Add(9, 1);
+        noteSprite.Add(0, 1);
+        noteSprite.Add(1, 2);
+        noteSprite.Add(2, 1);
+        noteSprite.Add(3, 2);
+        noteSprite.Add(4, 1);
+        noteSprite.Add(5, 0);
+        noteSprite.Add(7, 2);
+        noteSprite.Add(8, 1);
         //롱노트 시작점 스프라이트
-        noteSprite.Add(41, 4);
-        noteSprite.Add(42, 5);
-        noteSprite.Add(43, 4);
-        noteSprite.Add(44, 5);
-        noteSprite.Add(45, 4);
-        noteSprite.Add(46, 3);
-        noteSprite.Add(48, 5);
-        noteSprite.Add(49, 4);
+        noteSprite.Add(40, 4);
+        noteSprite.Add(41, 5);
+        noteSprite.Add(42, 4);
+        noteSprite.Add(43, 5);
+        noteSprite.Add(44, 4);
+        noteSprite.Add(45, 3);
+        noteSprite.Add(47, 5);
+        noteSprite.Add(48, 4);
         //롱노트 종점 스프라이트
-        noteSprite.Add(141, 7);
-        noteSprite.Add(142, 8);
-        noteSprite.Add(143, 7);
-        noteSprite.Add(144, 8);
-        noteSprite.Add(145, 7);
-        noteSprite.Add(146, 6);
-        noteSprite.Add(148, 8);
-        noteSprite.Add(149, 7);
+        noteSprite.Add(140, 7);
+        noteSprite.Add(141, 8);
+        noteSprite.Add(142, 7);
+        noteSprite.Add(143, 8);
+        noteSprite.Add(144, 7);
+        noteSprite.Add(145, 6);
+        noteSprite.Add(147, 8);
+        noteSprite.Add(148, 7);
         //롱노트 중앙 스프라이트
-        noteSprite.Add(241, 10);
-        noteSprite.Add(242, 11);
-        noteSprite.Add(243, 10);
-        noteSprite.Add(244, 11);
-        noteSprite.Add(245, 10);
-        noteSprite.Add(246, 9);
-        noteSprite.Add(248, 11);
-        noteSprite.Add(249, 10);
+        noteSprite.Add(240, 10);
+        noteSprite.Add(241, 11);
+        noteSprite.Add(242, 10);
+        noteSprite.Add(243, 11);
+        noteSprite.Add(244, 10);
+        noteSprite.Add(245, 9);
+        noteSprite.Add(247, 11);
+        noteSprite.Add(248, 10);
 //-----------위치지정------
-        noteLoc.Add(1,92);
-        noteLoc.Add(2,146);
-        noteLoc.Add(3,188);
-        noteLoc.Add(4,242);
-        noteLoc.Add(5,284);
-        noteLoc.Add(6,0);
-        noteLoc.Add(8,338);
-        noteLoc.Add(9,380);
+        noteLoc.Add(0,92);
+        noteLoc.Add(1,146);
+        noteLoc.Add(2,188);
+        noteLoc.Add(3,242);
+        noteLoc.Add(4,284);
+        noteLoc.Add(5,0);
+        noteLoc.Add(7,338);
+        noteLoc.Add(8,380);
 
 
 
@@ -139,6 +139,8 @@ public class dataManager : MonoBehaviour
         //플레이
         Player.playScript.BPM = firstBPM;
         Player.playScript.GetFirstKeysnd();
+        Player.playScript.BPMchangeTime=0;
+        Player.playScript.BPMchangescroll=0;
         Player.playScript.player.Start();
     }
     float convertFromThirysix(string value){//두자리수만 가능
@@ -351,7 +353,7 @@ public class dataManager : MonoBehaviour
                     for(int i = 0; noteData.Length > i*2; i++){//2글자씩 읽음
                         if(noteData.Substring(i*2,2) != "00"){//값이 0이 아닐때
                             convertFromThirysix(noteData.Substring(i*2,2));
-                            notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=1,noteValues=output.ToString()});
+                            notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=1,noteValues=output.ToString()});
                         }
                     }
                 }else if(noteType.Equals(2)){//마디별 크기---------------------------------------------------------------------
@@ -360,33 +362,33 @@ public class dataManager : MonoBehaviour
                     for(int i = 0; noteData.Length > i*2; i++){
                         if(noteData.Substring(i*2,2) != "00"){
                             convertFromSixteen(noteData.Substring(i*2,2));//옛날 BPM변속은 16진수(16*16-1=255)
-                            notes.Add(new Note{noteBeat=(currentMeasure+(2*i/(float)noteData.Length)), noteType=8,noteValues=output.ToString()});//모두 신식 변속으로 변경
+                            notes.Add(new preNote{noteBeat=(currentMeasure+(2*i/(float)noteData.Length)), noteType=8,noteValues=output.ToString()});//모두 신식 변속으로 변경
                         }
                     }
                 }else if(noteType.Equals(4)){//BGA------------------------------------------------------------
                     for(int i = 0; noteData.Length > i*2; i++){
                         if(noteData.Substring(i*2,2) != "00"){
-                            notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=4,noteValues = BGA[noteData.Substring(i*2,2)]});
+                            notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=4,noteValues = BGA[noteData.Substring(i*2,2)]});
                         }
                     }
                 }else if(noteType.Equals(5)){//POOR BGA------------------------------------------------------------
                     for(int i = 0; noteData.Length > i*2; i++){
                         if(noteData.Substring(i*2,2) != "00"){
                             convertFromThirysix(noteData.Substring(i*2,2));
-                            notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=5,noteValues=output.ToString()});
+                            notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=5,noteValues=output.ToString()});
                         }
                     }//-------ExtraObject(06)과 BGA-Layer(07)은 지원하지 않습니다-------
                 }else if(noteType.Equals(8)){//BPM변속(신식)------------------------------------------------------------------
                     for(int i = 0; noteData.Length > i*2; i++){
                         if(noteData.Substring(i*2,2) != "00"){
-                            notes.Add(new Note{noteBeat=(currentMeasure+(2*i/(float)noteData.Length)), noteType=8,noteValues=BPMs[noteData.Substring(i*2,2)]});
+                            notes.Add(new preNote{noteBeat=(currentMeasure+(2*i/(float)noteData.Length)), noteType=8,noteValues=BPMs[noteData.Substring(i*2,2)]});
                         }
                     }
                 }else if(noteType.Equals(9)){//STOP------------------------------------------------------------------
                     for(int i = 0; noteData.Length > i*2; i++){
                         if(noteData.Substring(i*2,2) != "00"){
                             convertFromThirysix(noteData.Substring(i*2,2));
-                            notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=9,noteValues=Stops[output]});
+                            notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=9,noteValues=Stops[output]});
                         }
                     }
                 }else if (noteType > 10){//노트들--------------------------------------------------------------------------------
@@ -396,16 +398,16 @@ public class dataManager : MonoBehaviour
                             if(noteData.Substring(i*2,2) != "00"){
                                 currentValue = noteData.Substring(i*2,2);
                                 convertFromThirysix(noteData.Substring(i*2,2));
-                                notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
+                                notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
                                 i++;
                                 if(currentValue.Equals(noteData.Substring(i*2,2))){
                                     notes.RemoveAt(notes.Count-1);
-                                    notes.Add(new Note{noteBeat=currentMeasure+(2*(i-1)/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
+                                    notes.Add(new preNote{noteBeat=currentMeasure+(2*(i-1)/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
                                     i++;
                                     while(currentValue.Equals(noteData.Substring(i*2,2))){
                                         i++;
                                     }
-                                    notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
+                                    notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
                                     i++;
                                 }
                             }
@@ -416,12 +418,12 @@ public class dataManager : MonoBehaviour
                             if(noteData.Substring(i*2,2) != "00"){
                                 if(noteData.Substring(i*2,2).Equals(LNOBJ)){
                                     int loc= notes.FindLastIndex(x => x.noteType==noteType);
-                                    notes[loc] = new Note{noteBeat=notes[loc].noteBeat, noteType=notes[loc].noteType+40, noteValues=notes[loc].noteValues};
-                                    notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
+                                    notes[loc] = new preNote{noteBeat=notes[loc].noteBeat, noteType=notes[loc].noteType+40, noteValues=notes[loc].noteValues};
+                                    notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType+40,noteValues=output.ToString()});
                                 }else{
                                     preMeasure = i;
                                     convertFromThirysix(noteData.Substring(i*2,2));
-                                    notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
+                                    notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
                                 }
                             }
                         }
@@ -429,7 +431,7 @@ public class dataManager : MonoBehaviour
                         for(int i = 0; noteData.Length > i*2; i++){
                             if(noteData.Substring(i*2,2) != "00"){
                                 convertFromThirysix(noteData.Substring(i*2,2));
-                                notes.Add(new Note{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
+                                notes.Add(new preNote{noteBeat=currentMeasure+(2*i/(float)noteData.Length), noteType=noteType,noteValues=output.ToString()});
                             }
                         }
                     }
@@ -467,59 +469,48 @@ public class dataManager : MonoBehaviour
                 noteTime += (noteBeat-preNoteBeat)*240/Player.playScript.BPM*scalePerMeasure[currentbeat];
                 noteScroll += (noteBeat-preNoteBeat)*144000/174545*scalePerMeasure[currentbeat];
                 if(noteType.Equals(1)){
-                    Player.playScript.BGMs.Enqueue(new BGnotes{noteTime=noteTime, noteSnd=int.Parse(notes[i].noteValues)});
-                }else if(noteType>10){//노트라면
+                    Player.playScript.BGMs.Enqueue(new BGnotes{noteTime=noteTime,noteSnd=int.Parse(notes[i].noteValues)});
+                }else if(noteType>10&&noteType<50){
                     GameObject noteMade = Instantiate(noteObj);
                     noteMade.transform.SetParent(GameObject.Find("PlayArea").transform);
-                    Notescript nScript = noteMade.GetComponent<Notescript>();
-                    nScript.time=noteTime;
-                    nScript.snd=int.Parse(notes[i].noteValues);
-                    nScript.scroll = noteScroll;
-                    nScript.noteType = noteType;
-                    if(noteType>50){
-                        Player.playScript.Notes[noteType-51].Enqueue(noteMade);
-                        if(LNactive[noteType-51]){//롱놑 끝부분이면
-                            LNactive[noteType-51] = false;
-                            nScript.EXtype = 2;
-                            nScript.snd=0;
-                            GameObject LNmade = Instantiate(noteObj);
-                            LNmade.transform.SetParent(GameObject.Find("PlayArea").transform);
-                            Notescript LNscript = LNmade.GetComponent<Notescript>();
-                            LNscript.EXtype = 3;
-                            LNscript.scroll = LNtime[noteType-51];
-                            LNscript.snd=0;
-                            LNscript.noteType = noteType;
-                            LNscript.LNtime = noteScroll-LNtime[noteType-51];//계산한 롱노트 시간 보냄
-                            LNscript.lnEndnote = nScript.GetComponent<Notescript>();
-                        }else{//아니면
-                            LNactive[noteType-51] = true;
-                            nScript.EXtype = 1;
-                            LNtime[noteType-51] = noteScroll;//롱노트 시작부분 체크(거리계산 위해)
-                        }
-                    }else{
-                        nScript.EXtype = 0;
-                        Player.playScript.Notes[noteType-11].Enqueue(noteMade);
+                    Notescript noteSc=noteMade.GetComponent<Notescript>();
+                    noteSc.noteLine = noteType-11;
+                    noteSc.noteNumber = Player.playScript.Notes[noteType-11].Count;
+                    Player.playScript.Notes[noteType-11].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,Type=noteType-10,scroll=noteScroll,Type2=0,proced=false});
+                }else if(noteType>50){
+                    if(LNactive[noteType-51]){//롱노트 끝부분
+                        GameObject noteMade = Instantiate(noteObj);
+                        noteMade.transform.SetParent(GameObject.Find("PlayArea").transform);
+                        Notescript noteSc=noteMade.GetComponent<Notescript>();
+                        noteSc.noteLine = noteType-51;
+                        noteSc.noteNumber = Player.playScript.Notes[noteType-51].Count;
+                        Player.playScript.Notes[noteType-51].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,Type=noteType-10,scroll=noteScroll,Type2=2,proced=false});
+                        noteMade = Instantiate(noteObj);
+                        noteMade.transform.SetParent(GameObject.Find("PlayArea").transform);
+                        noteSc=noteMade.GetComponent<Notescript>();
+                        noteSc.noteLine = noteType-51;
+                        noteSc.noteNumber = Player.playScript.Notes[noteType-51].Count-1;
+                        noteSc.noteType=3;
+                        LNactive[noteType-51]=false;
+                    }else{//롱노트 시작부분
+                        GameObject noteMade = Instantiate(noteObj);
+                        noteMade.transform.SetParent(GameObject.Find("PlayArea").transform);
+                        Notescript noteSc=noteMade.GetComponent<Notescript>();
+                        noteSc.noteLine = noteType-51;
+                        noteSc.noteNumber = Player.playScript.Notes[noteType-51].Count;
+                        Player.playScript.Notes[noteType-51].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,Type=noteType-10,scroll=noteScroll,Type2=1,proced=false});
+                        LNactive[noteType-51]=true;
                     }
                 }else if(noteType.Equals(8)){//변속이라면
                     Player.playScript.BPM = float.Parse(notes[i].noteValues);
-                    GameObject notemade = Instantiate(noteObj);
-                    Notescript nscript = notemade.GetComponent<Notescript>();
-                    nscript.noteType = 8;
-                    nscript.time = noteTime;
-                    nscript.scroll = noteScroll;
-                    nscript.LNtime = Player.playScript.BPM;
+                    Player.playScript.scrolls.Enqueue(new ScrollNote{type=8,time=noteTime,scroll=noteScroll,value=float.Parse(notes[i].noteValues)});
                 }else if(noteType.Equals(4)){//BGA라면
                     //VideoManager vManagerScript = videoObj.GetComponent<VideoManager>();
                     //vManagerScript.time = noteTime;
                     //vManagerScript.fileLoc = Path.GetDirectoryName(fileLocation)+'/'+notes[i].noteValues;
                     //StartCoroutine(vManagerScript.playVideo());
                 }else if(noteType.Equals(9)){//STOP이라면
-                    GameObject notemade = Instantiate(noteObj);
-                    Notescript nscript = notemade.GetComponent<Notescript>();
-                    nscript.noteType = 9;
-                    nscript.time = noteTime;
-                    nscript.scroll = noteScroll;
-                    nscript.LNtime = (float.Parse(notes[i].noteValues))/192*240/Player.playScript.BPM;
+                    Player.playScript.scrolls.Enqueue(new ScrollNote{type=9,time=noteTime,scroll=noteScroll,value=(float.Parse(notes[i].noteValues))/192*240/Player.playScript.BPM});
                     noteTime += (float.Parse(notes[i].noteValues))/192*240/Player.playScript.BPM;
                 }
                 preNoteBeat = noteBeat;
@@ -532,16 +523,20 @@ public class dataManager : MonoBehaviour
                 noteTime += (currentbeat-preNoteBeat)*240/Player.playScript.BPM*scalePerMeasure[currentbeat-1];
                 noteScroll += (currentbeat-preNoteBeat)*144000*scalePerMeasure[currentbeat-1]/174545;
                 GameObject bar = Instantiate(barObj);
+                bar.transform.SetParent(GameObject.Find("PlayArea").transform);
                 BarScript barscript = bar.GetComponent<BarScript>();
                 barscript.scroll = noteScroll;
+                barscript.time = noteTime;
                 StartCoroutine(barscript.barGO());
                 while(currentbeat < Mathf.FloorToInt(noteBeat)){
                     noteTime += 240/Player.playScript.BPM*scalePerMeasure[currentbeat];
                     noteScroll += 144000*scalePerMeasure[currentbeat]/174545;
                     currentbeat++;
                     bar = Instantiate(barObj);
+                    bar.transform.SetParent(GameObject.Find("PlayArea").transform);
                     barscript = bar.GetComponent<BarScript>();
                     barscript.scroll = noteScroll;
+                    barscript.time = noteTime;
                     StartCoroutine(barscript.barGO());
                 }
                 preNoteBeat = currentbeat;
@@ -551,12 +546,27 @@ public class dataManager : MonoBehaviour
         loadDone = 1;
     }
 }
-public struct Note{
+public struct preNote{
     public float noteBeat;
     public string noteValues;
     public int noteType;
 }
+public struct Note{
+    public int snd;
+    public float Time;
+    public int Type;
+    public int Type2;
+    public float scroll;
+    public GameObject note;
+    public bool proced;
+}
 public struct BGnotes{
     public float noteTime;
     public int noteSnd;
+}
+public struct ScrollNote{
+    public uint type;
+    public float time;
+    public float scroll;
+    public float value;
 }

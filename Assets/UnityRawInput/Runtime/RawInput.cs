@@ -151,7 +151,12 @@ namespace UnityRawInput
         // https://github.com/Elringus/UnityRawInput/issues/19#issuecomment-1227462101
         private static void EnsureRunInBackgroundEnabled ()
         {
-            return;
+            if (Application.runInBackground) return;
+            Debug.LogWarning("Application isn't set to run in background! Not enabling this option will " +
+                             "cause severe mouse slowdown if the window isn't in focus. Enabling behavior for this play session, " +
+                             "but you should explicitly enable this in \"Build Settings→Player Settings→Player→Resolution and " +
+                             "Presentation→Run In Background\".");
+            Application.runInBackground = true;
         }
     }
 }

@@ -7,11 +7,36 @@ using System.Runtime.InteropServices;
 using System.Windows;
 public class Player : MonoBehaviour
 {
-    
+    public int[] judgeProgress = new int[9];
+    private void OnEnable ()
+    {
+        UnityRawInput.RawInput.WorkInBackground = true;
+        UnityRawInput.RawInput.InterceptMessages = false;
+
+        UnityRawInput.RawInput.Start();
+    }
+
+    private void OnDisable ()
+    {
+        UnityRawInput.RawInput.Stop();
+    }
+
+    private void OnValidate ()
+    {
+        // Apply options when toggles are clicked in editor.
+        // OnValidate is invoked only in the editor (won't affect build).
+        UnityRawInput.RawInput.InterceptMessages = false;
+        UnityRawInput.RawInput.WorkInBackground = true;
+    }
+    //여기까지 rawinput기본 설정
+
+    //----------
+
     public Thread player;
     public static Player playScript;
     public static float HISPEED = 2;
-    public List<Queue<GameObject>> Notes = new List<Queue<GameObject>>();
+    public List<List<Note>> Notes = new List<List<Note>>();
+
     //플레이중 저장되는 데이터들
     public int playScore;
     public int playCombo;
@@ -28,19 +53,20 @@ public class Player : MonoBehaviour
     public FMOD.System system;
     public static System.Diagnostics.Stopwatch Time = new System.Diagnostics.Stopwatch();//초시계
     public Queue<BGnotes> BGMs = new Queue<BGnotes>();
+    public Queue<ScrollNote> scrolls = new Queue<ScrollNote>();
     private int[] sndPerKey = new int[9];
     private bool[] KeyActived = new bool[9];
     private void Awake() {
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
-        Notes.Add(new Queue<GameObject>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
+        Notes.Add(new List<Note>());
         player = new Thread(playBGM);
         playScript = gameObject.GetComponent<Player>();
         system = FMODUnity.RuntimeManager.CoreSystem;
@@ -52,7 +78,24 @@ public class Player : MonoBehaviour
         system.getMasterChannelGroup(out channelGroup);
     }
     void Update(){
-        if(STOPED){
+        if(scrolls.Count>0){
+            if(scrolls.Peek().time*1000<=Time.Elapsed.TotalMilliseconds){
+                if(scrolls.Peek().type.Equals(8)){//변속
+                    BPM=scrolls.Peek().value;
+                    BPMchangeTime=scrolls.Peek().time;
+                    BPMchangescroll=scrolls.Peek().scroll;
+                    scrolls.Dequeue();
+                }else if(scrolls.Peek().type.Equals(9)){//정지
+                    STOPED=true;
+                    BPMchangeTime=scrolls.Peek().time;
+                    BPMchangescroll=scrolls.Peek().scroll;
+                    if((scrolls.Peek().time+scrolls.Peek().value)*1000<=Time.Elapsed.TotalMilliseconds){
+                        STOPED=false;
+                        scrolls.Dequeue();
+                    }
+                }
+            }
+        }if(STOPED){
             totalScroll=BPMchangescroll;
         }else{
             totalScroll = ((float)Time.Elapsed.TotalMilliseconds-BPMchangeTime*1000)*0.6f*BPM/174545+BPMchangescroll;
@@ -64,28 +107,40 @@ public class Player : MonoBehaviour
         }
     }
     public void GetFirstKeysnd(){
-        sndPerKey[0] = Notes[0].Peek().GetComponent<Notescript>().snd;
-        sndPerKey[1] = Notes[1].Peek().GetComponent<Notescript>().snd;
-        sndPerKey[2] = Notes[2].Peek().GetComponent<Notescript>().snd;
-        sndPerKey[3] = Notes[3].Peek().GetComponent<Notescript>().snd;
-        sndPerKey[4] = Notes[4].Peek().GetComponent<Notescript>().snd;
-        sndPerKey[5] = Notes[5].Peek().GetComponent<Notescript>().snd;
-        sndPerKey[7] = Notes[7].Peek().GetComponent<Notescript>().snd;
-        sndPerKey[8] = Notes[8].Peek().GetComponent<Notescript>().snd;
+        getSnd(0);
+        getSnd(1);
+        getSnd(2);
+        getSnd(3);
+        getSnd(4);
+        getSnd(5);
+        getSnd(7);
+        getSnd(8);
+    }
+    private void getSnd(int num){
+        sndPerKey[num]=Notes[num][judgeProgress[num]].snd;
     }
     public void playBGM(){
-        UnityRawInput.RawInput.Start();
         Time.Start();
         BGnotes currentBGM = BGMs.Peek();
+        float TimeCheck = 0;
+        int tickCheck = 0;
+        int Tick=0;
         while (true){
-            Thread.Sleep(1);
+            if(Tick-(int)Time.Elapsed.TotalMilliseconds>0){
+                Thread.Sleep(1);
+            }
+            Tick++;
+            tickCheck++;
+            if(TimeCheck<(float)Time.Elapsed.TotalMilliseconds){
+                TimeCheck+=1000;
+                Debug.Log(tickCheck);
+                tickCheck=0;
+            }
             if(BGMs.Count > 0){
                 while(currentBGM.noteTime*1000<=Time.Elapsed.TotalMilliseconds){
                     currentBGM = BGMs.Dequeue();
                     channel[currentBGM.noteSnd].stop();
-                    if(UnityRawInput.RawInput.AnyKeyDown){
-                        system.playSound(WAV[currentBGM.noteSnd], channelGroup, false, out channel[currentBGM.noteSnd]);
-                    }
+                    system.playSound(WAV[currentBGM.noteSnd], channelGroup, false, out channel[currentBGM.noteSnd]);
                     if(BGMs.Count <= 0){
                         break;
                     }
@@ -93,65 +148,73 @@ public class Player : MonoBehaviour
                 }
             }
             //--------------------
-            if(true){
+            CheckMissedNote(0);
+            CheckMissedNote(1);
+            CheckMissedNote(2);
+            CheckMissedNote(3);
+            CheckMissedNote(4);
+            CheckMissedNote(5);
+            CheckMissedNote(7);
+            CheckMissedNote(8);
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.S)){
                 if(KeyActived[0]){
-                    system.playSound(WAV[22], channelGroup, false, out channel[22]);
+                    Judge(1);
                     KeyActived[0]=false;
                 }
             }else{
                 KeyActived[0]=true;
             }
-            if(true){
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.D)){
                 if(KeyActived[1]){
-                    system.playSound(WAV[2], channelGroup, false, out channel[2]);
+                    Judge(2);
                     KeyActived[1]=false;
                 }
             }else{
                 KeyActived[1]=true;
             }
-            if(true){
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.F)){
                 if(KeyActived[2]){
-                    system.playSound(WAV[2], channelGroup, false, out channel[2]);
+                    Judge(3);
                     KeyActived[2]=false;
                 }
             }else{
                 KeyActived[2]=true;
             }
-            if(true){
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.Space)){
                 if(KeyActived[3]){
-                    system.playSound(WAV[2], channelGroup, false, out channel[2]);
+                    Judge(4);
                     KeyActived[3]=false;
                 }
             }else{
                 KeyActived[3]=true;
             }
-            if(true){
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.J)){
                 if(KeyActived[4]){
-                    system.playSound(WAV[2], channelGroup, false, out channel[2]);
+                    Judge(5);
                     KeyActived[4]=false;
                 }
             }else{
                 KeyActived[4]=true;
             }
-            if(true){
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.LeftShift)){
                 if(KeyActived[5]){
-                    system.playSound(WAV[2], channelGroup, false, out channel[2]);
+                    Judge(6);
                     KeyActived[5]=false;
                 }
             }else{
                 KeyActived[5]=true;
             }
-            if(true){
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.K)){
                 if(KeyActived[7]){
-                    system.playSound(WAV[2], channelGroup, false, out channel[2]);
+                    Judge(8);
                     KeyActived[7]=false;
                 }
             }else{
                 KeyActived[7]=true;
             }
-            if(true){
+            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.L)){
                 if(KeyActived[8]){
-                    system.playSound(WAV[2], channelGroup, false, out channel[2]);
+                    Judge(9);
                     KeyActived[8]=false;
                 }
             }else{
@@ -159,121 +222,46 @@ public class Player : MonoBehaviour
             }
         }
     }
-    void Judge(int noteNum){
-        GameObject note = Notes[noteNum-1].Peek();
-        Notescript noteScript = note.GetComponent<Notescript>();
-        if(noteScript.noteType<50){
-            if(noteScript.time*1000 <= Time.Elapsed.TotalMilliseconds+dataManager.judgeTimings[0] && noteScript.time*1000 >= Time.Elapsed.TotalMilliseconds-dataManager.judgeTimings[0]){
-                sndPerKey[noteNum-1] = noteScript.snd;//PG
-                Destroy(note);
-                Notes[noteNum-1].Dequeue();
-                playScore+=2;
-                playCombo++;
-            }else if(noteScript.time*1000 <= Time.Elapsed.TotalMilliseconds+dataManager.judgeTimings[1] && noteScript.time*1000 >= Time.Elapsed.TotalMilliseconds-dataManager.judgeTimings[1]){
-                sndPerKey[noteNum-1] = noteScript.snd;//GR
-                Destroy(note);
-                Notes[noteNum-1].Dequeue();
-                playScore++;
-                playCombo++;
-            }else if(noteScript.time*1000 <= Time.Elapsed.TotalMilliseconds+dataManager.judgeTimings[2] && noteScript.time*1000 >= Time.Elapsed.TotalMilliseconds-dataManager.judgeTimings[2]){
-                sndPerKey[noteNum-1] = noteScript.snd;//GD
-                Destroy(note);
-                Notes[noteNum-1].Dequeue();
-                playCombo++;
-            }else if(noteScript.time*1000 <= Time.Elapsed.TotalMilliseconds+dataManager.judgeTimings[3] && noteScript.time*1000 >= Time.Elapsed.TotalMilliseconds-dataManager.judgeTimings[3]){
-                sndPerKey[noteNum-1] = noteScript.snd;//BD
-                Destroy(note);
-                Notes[noteNum-1].Dequeue();
-                playCombo=0;
+    void CheckMissedNote(int noteNum){
+        if(Notes[noteNum].Count>judgeProgress[noteNum]){
+            if(Notes[noteNum][judgeProgress[noteNum]].Time*1000+dataManager.judgeTimings[4]<Time.Elapsed.TotalMilliseconds){
+                Note note = Notes[noteNum][judgeProgress[noteNum]];
+                if(note.Type2==1){
+                    note.proced = true;
+                    Notes[noteNum][judgeProgress[noteNum]] = note;
+                    judgeProgress[noteNum]+=1;
+                    note = Notes[noteNum][judgeProgress[noteNum]];
+                    note.proced = true;
+                    Notes[noteNum][judgeProgress[noteNum]] = note;
+                    judgeProgress[noteNum]+=1;
+                }else{
+                    note.proced = true;
+                    Notes[noteNum][judgeProgress[noteNum]] = note;
+                    judgeProgress[noteNum]+=1;
+                }
+                getSnd(noteNum);
             }
-            if(sndPerKey[noteNum-1]!=0){
-                channel[sndPerKey[noteNum-1]].stop();
-                FMODUnity.RuntimeManager.CoreSystem.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
-            }
-        }else{
-            StartCoroutine(LNjudge(noteNum));
         }
     }
-    IEnumerator LNjudge(int noteNum){
-        int saveJudge = 0;//0:poor,BD,1:PG,2:GR,3:GD
-        GameObject note;
-        Notescript noteScript;
-        GameObject Endnote;
-        Notescript EndnoteScript;
-        note = Notes[noteNum-1].Peek();
-        noteScript = note.GetComponent<Notescript>();
-        if(noteScript.time*1000 <= Time.Elapsed.TotalMilliseconds+dataManager.judgeTimings[3] && noteScript.time*1000 >= Time.Elapsed.TotalMilliseconds-dataManager.judgeTimings[3]){
-            if(noteScript.time*1000 <= Time.Elapsed.TotalMilliseconds+dataManager.judgeTimings[0] && noteScript.time*1000 >= Time.Elapsed.TotalMilliseconds-dataManager.judgeTimings[0]){
-                sndPerKey[noteNum-1] = noteScript.snd;//PG
-                Destroy(note);
-                if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
+    void Judge(int noteNum){
+        if(Notes[noteNum-1].Count>judgeProgress[noteNum-1]){
+            Note note = Notes[noteNum-1][judgeProgress[noteNum-1]];
+            if(note.Time*1000+dataManager.judgeTimings[4] >= Time.Elapsed.TotalMilliseconds && note.Time*1000-dataManager.judgeTimings[4] <= Time.Elapsed.TotalMilliseconds){
+                sndPerKey[noteNum-1] = note.snd;//PG
+                note.proced = true;
+                Notes[noteNum-1][judgeProgress[noteNum-1]] = note;
+                judgeProgress[noteNum-1]+=1;
+                if(note.Type2==1){
+                    note = Notes[noteNum-1][judgeProgress[noteNum-1]];
+                    sndPerKey[noteNum-1] = note.snd;//PG
+                    note.proced = true;
+                    Notes[noteNum-1][judgeProgress[noteNum-1]] = note;
+                    judgeProgress[noteNum-1]+=1;
                 }
-                Notes[noteNum-1].Dequeue();
-                Endnote = Notes[noteNum-1].Peek();
-                EndnoteScript = Endnote.GetComponent<Notescript>();
-                EndnoteScript.EXtype = 4;
-                playCombo++;
-                saveJudge = 1;
-            }else if(noteScript.time*1000 <= Time.ElapsedMilliseconds+dataManager.judgeTimings[1] && noteScript.time*1000 >= Time.ElapsedMilliseconds-dataManager.judgeTimings[1]){
-                sndPerKey[noteNum-1] = noteScript.snd;//GR
-                Destroy(note);
-                if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
-                }
-                Notes[noteNum-1].Dequeue();
-                Endnote = Notes[noteNum-1].Peek();
-                EndnoteScript = Endnote.GetComponent<Notescript>();
-                EndnoteScript.EXtype = 4;
-                playCombo++;
-                saveJudge = 2;
-            }else if(noteScript.time*1000 <= Time.ElapsedMilliseconds+dataManager.judgeTimings[2] && noteScript.time*1000 >= Time.ElapsedMilliseconds-dataManager.judgeTimings[2]){
-                sndPerKey[noteNum-1] = noteScript.snd;//GD
-                Destroy(note);
-                if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
-                }
-                Notes[noteNum-1].Dequeue();
-                Endnote = Notes[noteNum-1].Peek();
-                EndnoteScript = Endnote.GetComponent<Notescript>();
-                EndnoteScript.EXtype = 4;
-                playCombo++;
-                saveJudge = 3;
-            }else{
-                sndPerKey[noteNum-1] = noteScript.snd;//BD
-                Destroy(note);
-                if(sndPerKey[noteNum-1]!=0){
-                FMODUnity.RuntimeManager.CoreSystem.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
-                }
-                Notes[noteNum-1].Dequeue();
-                Endnote = Notes[noteNum-1].Peek();
-                EndnoteScript = Endnote.GetComponent<Notescript>();
-                playCombo=0;
-                saveJudge = 0;
-            }
-            if(!saveJudge.Equals(0)){
-                float tickTime=15/BPM;
-                while(EndnoteScript.time*1000>Time.ElapsedMilliseconds-(15/BPM)){
-                    yield return new WaitUntil(()=>Time.ElapsedMilliseconds>=noteScript.time+tickTime);
-                    if(true){
-                        noteScript.EXtype = 4;
-                        tickTime+=15/BPM;
-                    }else{
-                        noteScript.EXtype = 2;
-                        saveJudge = 0;
-                        break;
-                        //롱놑미스
-                    }
-                }
-            }
-            yield return new WaitUntil(()=>EndnoteScript.time*1000<=Time.ElapsedMilliseconds);
-            Destroy(Endnote);
-            Notes[noteNum-1].Dequeue();
-            if(saveJudge.Equals(1)){
                 playScore+=2;
-            }else if(saveJudge.Equals(2)){
-                playScore++;
+                playCombo++;
             }
+            system.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
         }
     }
 }
