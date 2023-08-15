@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 public class Player : MonoBehaviour
 {
+    public UnityRawInput.RawKey[] keybind = new UnityRawInput.RawKey[9];
     public int[] judgeProgress = new int[9];
     private void OnEnable ()
     {
@@ -51,7 +52,7 @@ public class Player : MonoBehaviour
     public static float totalScroll;
     public bool STOPED;
     public FMOD.System system;
-    public static System.Diagnostics.Stopwatch Time = new System.Diagnostics.Stopwatch();//초시계
+    public static long elpasedTick;//초시계
     public Queue<BGnotes> BGMs = new Queue<BGnotes>();
     public Queue<ScrollNote> scrolls = new Queue<ScrollNote>();
     private int[] sndPerKey = new int[9];
@@ -78,27 +79,10 @@ public class Player : MonoBehaviour
         system.getMasterChannelGroup(out channelGroup);
     }
     void Update(){
-        if(scrolls.Count>0){
-            if(scrolls.Peek().time*1000<=Time.Elapsed.TotalMilliseconds){
-                if(scrolls.Peek().type.Equals(8)){//변속
-                    BPM=scrolls.Peek().value;
-                    BPMchangeTime=scrolls.Peek().time;
-                    BPMchangescroll=scrolls.Peek().scroll;
-                    scrolls.Dequeue();
-                }else if(scrolls.Peek().type.Equals(9)){//정지
-                    STOPED=true;
-                    BPMchangeTime=scrolls.Peek().time;
-                    BPMchangescroll=scrolls.Peek().scroll;
-                    if((scrolls.Peek().time+scrolls.Peek().value)*1000<=Time.Elapsed.TotalMilliseconds){
-                        STOPED=false;
-                        scrolls.Dequeue();
-                    }
-                }
-            }
-        }if(STOPED){
+        if(STOPED){
             totalScroll=BPMchangescroll;
         }else{
-            totalScroll = ((float)Time.Elapsed.TotalMilliseconds-BPMchangeTime*1000)*0.6f*BPM/174545+BPMchangescroll;
+            totalScroll = (elpasedTick-BPMchangeTime*1000*10000)*0.00006f*BPM/174545+BPMchangescroll;
         }
         if(Input.GetKeyDown(KeyCode.F1)){
             HISPEED-=0.5f;
@@ -115,29 +99,30 @@ public class Player : MonoBehaviour
         getSnd(5);
         getSnd(7);
         getSnd(8);
+        keybind[0]=UnityRawInput.RawKey.S;
+        keybind[1]=UnityRawInput.RawKey.D;
+        keybind[2]=UnityRawInput.RawKey.F;
+        keybind[3]=UnityRawInput.RawKey.Space;
+        keybind[4]=UnityRawInput.RawKey.J;
+        keybind[5]=UnityRawInput.RawKey.LeftShift;
+        keybind[7]=UnityRawInput.RawKey.K;
+        keybind[8]=UnityRawInput.RawKey.L;
     }
     private void getSnd(int num){
         sndPerKey[num]=Notes[num][judgeProgress[num]].snd;
     }
     public void playBGM(){
-        Time.Start();
+        DateTime StartTime = DateTime.Now;
         BGnotes currentBGM = BGMs.Peek();
-        float TimeCheck = 0;
-        int tickCheck = 0;
-        int Tick=0;
-        while (true){
-            if(Tick-(int)Time.Elapsed.TotalMilliseconds>0){
-                Thread.Sleep(1);
-            }
-            Tick++;
-            tickCheck++;
-            if(TimeCheck<(float)Time.Elapsed.TotalMilliseconds){
-                TimeCheck+=1000;
-                Debug.Log(tickCheck);
-                tickCheck=0;
+        long time = 0;
+        while (IsGameGoing()){
+            elpasedTick = DateTime.Now.Ticks - StartTime.Ticks;
+            time += 1250;
+            while (time>elpasedTick){
+                elpasedTick = DateTime.Now.Ticks - StartTime.Ticks;//0.125ms 대기
             }
             if(BGMs.Count > 0){
-                while(currentBGM.noteTime*1000<=Time.Elapsed.TotalMilliseconds){
+                while(currentBGM.noteTime*1000*10000<=time){
                     currentBGM = BGMs.Dequeue();
                     channel[currentBGM.noteSnd].stop();
                     system.playSound(WAV[currentBGM.noteSnd], channelGroup, false, out channel[currentBGM.noteSnd]);
@@ -148,85 +133,49 @@ public class Player : MonoBehaviour
                 }
             }
             //--------------------
-            CheckMissedNote(0);
-            CheckMissedNote(1);
-            CheckMissedNote(2);
-            CheckMissedNote(3);
-            CheckMissedNote(4);
-            CheckMissedNote(5);
-            CheckMissedNote(7);
-            CheckMissedNote(8);
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.S)){
-                if(KeyActived[0]){
-                    Judge(1);
-                    KeyActived[0]=false;
+            CheckMissedNote(0,time);
+            CheckMissedNote(1,time);
+            CheckMissedNote(2,time);
+            CheckMissedNote(3,time);
+            CheckMissedNote(4,time);
+            CheckMissedNote(5,time);
+            CheckMissedNote(7,time);
+            CheckMissedNote(8,time);
+            //--------------------------
+            Judge(1,time);
+            Judge(2,time);
+            Judge(3,time);
+            Judge(4,time);
+            Judge(5,time);
+            Judge(6,time);
+            Judge(8,time);
+            Judge(9,time);
+            if(scrolls.Count>0){
+                if(scrolls.Peek().time*1000*10000<=elpasedTick){
+                    if(scrolls.Peek().type.Equals(8)){//변속
+                        BPM=scrolls.Peek().value;
+                        BPMchangeTime=scrolls.Peek().time;
+                        BPMchangescroll=scrolls.Peek().scroll;
+                        scrolls.Dequeue();
+                    }else if(scrolls.Peek().type.Equals(9)){//정지
+                        STOPED=true;
+                        BPMchangeTime=scrolls.Peek().time;
+                        BPMchangescroll=scrolls.Peek().scroll;
+                        if((scrolls.Peek().time+scrolls.Peek().value)*1000*10000<=elpasedTick){
+                            STOPED=false;
+                            scrolls.Dequeue();
+                        }
+                    }
                 }
-            }else{
-                KeyActived[0]=true;
-            }
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.D)){
-                if(KeyActived[1]){
-                    Judge(2);
-                    KeyActived[1]=false;
-                }
-            }else{
-                KeyActived[1]=true;
-            }
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.F)){
-                if(KeyActived[2]){
-                    Judge(3);
-                    KeyActived[2]=false;
-                }
-            }else{
-                KeyActived[2]=true;
-            }
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.Space)){
-                if(KeyActived[3]){
-                    Judge(4);
-                    KeyActived[3]=false;
-                }
-            }else{
-                KeyActived[3]=true;
-            }
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.J)){
-                if(KeyActived[4]){
-                    Judge(5);
-                    KeyActived[4]=false;
-                }
-            }else{
-                KeyActived[4]=true;
-            }
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.LeftShift)){
-                if(KeyActived[5]){
-                    Judge(6);
-                    KeyActived[5]=false;
-                }
-            }else{
-                KeyActived[5]=true;
-            }
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.K)){
-                if(KeyActived[7]){
-                    Judge(8);
-                    KeyActived[7]=false;
-                }
-            }else{
-                KeyActived[7]=true;
-            }
-            if(UnityRawInput.RawInput.IsKeyDown(UnityRawInput.RawKey.L)){
-                if(KeyActived[8]){
-                    Judge(9);
-                    KeyActived[8]=false;
-                }
-            }else{
-                KeyActived[8]=true;
             }
         }
+        Debug.Log("끝");
     }
-    void CheckMissedNote(int noteNum){
+    void CheckMissedNote(int noteNum,long time){
         if(Notes[noteNum].Count>judgeProgress[noteNum]){
-            if(Notes[noteNum][judgeProgress[noteNum]].Time*1000+dataManager.judgeTimings[4]<Time.Elapsed.TotalMilliseconds){
+            if((Notes[noteNum][judgeProgress[noteNum]].Time*1000+dataManager.judgeTimings[4])*10000<time){
                 Note note = Notes[noteNum][judgeProgress[noteNum]];
-                if(note.Type2==1){
+                if(note.Type==1){
                     note.proced = true;
                     Notes[noteNum][judgeProgress[noteNum]] = note;
                     judgeProgress[noteNum]+=1;
@@ -243,25 +192,45 @@ public class Player : MonoBehaviour
             }
         }
     }
-    void Judge(int noteNum){
-        if(Notes[noteNum-1].Count>judgeProgress[noteNum-1]){
-            Note note = Notes[noteNum-1][judgeProgress[noteNum-1]];
-            if(note.Time*1000+dataManager.judgeTimings[4] >= Time.Elapsed.TotalMilliseconds && note.Time*1000-dataManager.judgeTimings[4] <= Time.Elapsed.TotalMilliseconds){
-                sndPerKey[noteNum-1] = note.snd;//PG
-                note.proced = true;
-                Notes[noteNum-1][judgeProgress[noteNum-1]] = note;
-                judgeProgress[noteNum-1]+=1;
-                if(note.Type2==1){
-                    note = Notes[noteNum-1][judgeProgress[noteNum-1]];
-                    sndPerKey[noteNum-1] = note.snd;//PG
-                    note.proced = true;
-                    Notes[noteNum-1][judgeProgress[noteNum-1]] = note;
-                    judgeProgress[noteNum-1]+=1;
+    bool IsGameGoing(){
+        if(Notes[0].Count<=0 & Notes[1].Count<=0 & Notes[2].Count<=0 & Notes[3].Count<=0 & Notes[4].Count<=0 & Notes[5].Count<=0 & Notes[6].Count<=0 & Notes[8].Count<=0 & Notes[9].Count<=0 & BGMs.Count<=0){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    void Judge(int noteNum,long time){
+        if(UnityRawInput.RawInput.IsKeyDown(keybind[noteNum-1])){
+            if(Notes[noteNum-1].Count>judgeProgress[noteNum-1]){
+                if(Notes[noteNum-1][judgeProgress[noteNum-1]].Type>=2){
+                    if(Notes[noteNum-1].Count>judgeProgress[noteNum-1]){
+                        Note note = Notes[noteNum-1][judgeProgress[noteNum-1]];
+                        if((note.Time*1000)*10000 >= time){
+                            note.Type=3;
+                            Notes[noteNum-1][judgeProgress[noteNum-1]] = note;
+                        }else{
+                            sndPerKey[noteNum-1] = note.snd;//PG
+                            note.proced = true;
+                            Notes[noteNum-1][judgeProgress[noteNum-1]] = note;
+                            judgeProgress[noteNum-1]+=1;
+                        }
+                    }
+                }else{
+                    if(KeyActived[noteNum-1]){
+                        Note note = Notes[noteNum-1][judgeProgress[noteNum-1]];
+                        if((note.Time*1000+dataManager.judgeTimings[4])*10000 >= time && (note.Time*1000-dataManager.judgeTimings[4])*10000 <= time){
+                            sndPerKey[noteNum-1] = note.snd;//PG
+                            note.proced = true;
+                            Notes[noteNum-1][judgeProgress[noteNum-1]] = note;
+                            judgeProgress[noteNum-1]+=1;
+                        }
+                        system.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
+                    }
                 }
-                playScore+=2;
-                playCombo++;
             }
-            system.playSound(WAV[sndPerKey[noteNum-1]], channelGroup, false, out channel[sndPerKey[noteNum-1]]);
+            KeyActived[noteNum-1]=false;
+        }else{
+            KeyActived[noteNum-1]=true;
         }
     }
 }

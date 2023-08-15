@@ -9,7 +9,7 @@ public class BarScript : MonoBehaviour
     public float time;
     public IEnumerator barGO(){
         tr = gameObject.GetComponent<Transform>();
-        while(Player.Time.Elapsed.TotalMilliseconds<time*1000){
+        while(Player.elpasedTick<time*1000*10000){
             yield return null;
             tr.position = new Vector3(215.5f+dataManager.playAreaX,((scroll-Player.totalScroll)*723*Player.HISPEED)+358.5f,0);
         }

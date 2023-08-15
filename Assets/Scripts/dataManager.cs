@@ -468,23 +468,23 @@ public class dataManager : MonoBehaviour
                 noteBeat = notes[i].noteBeat;
                 noteTime += (noteBeat-preNoteBeat)*240/Player.playScript.BPM*scalePerMeasure[currentbeat];
                 noteScroll += (noteBeat-preNoteBeat)*144000/174545*scalePerMeasure[currentbeat];
-                if(noteType.Equals(1)){
+                if(noteType.Equals(1)){//배경음
                     Player.playScript.BGMs.Enqueue(new BGnotes{noteTime=noteTime,noteSnd=int.Parse(notes[i].noteValues)});
-                }else if(noteType>10&&noteType<50){
+                }else if(noteType>10&&noteType<50){//일반노트
                     GameObject noteMade = Instantiate(noteObj);
                     noteMade.transform.SetParent(GameObject.Find("PlayArea").transform);
                     Notescript noteSc=noteMade.GetComponent<Notescript>();
                     noteSc.noteLine = noteType-11;
                     noteSc.noteNumber = Player.playScript.Notes[noteType-11].Count;
-                    Player.playScript.Notes[noteType-11].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,Type=noteType-10,scroll=noteScroll,Type2=0,proced=false});
-                }else if(noteType>50){
+                    Player.playScript.Notes[noteType-11].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,scroll=noteScroll,Type=0,proced=false});
+                }else if(noteType>50){//롱노트
                     if(LNactive[noteType-51]){//롱노트 끝부분
                         GameObject noteMade = Instantiate(noteObj);
                         noteMade.transform.SetParent(GameObject.Find("PlayArea").transform);
                         Notescript noteSc=noteMade.GetComponent<Notescript>();
                         noteSc.noteLine = noteType-51;
                         noteSc.noteNumber = Player.playScript.Notes[noteType-51].Count;
-                        Player.playScript.Notes[noteType-51].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,Type=noteType-10,scroll=noteScroll,Type2=2,proced=false});
+                        Player.playScript.Notes[noteType-51].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,scroll=noteScroll,Type=2,proced=false});
                         noteMade = Instantiate(noteObj);
                         noteMade.transform.SetParent(GameObject.Find("PlayArea").transform);
                         noteSc=noteMade.GetComponent<Notescript>();
@@ -498,17 +498,17 @@ public class dataManager : MonoBehaviour
                         Notescript noteSc=noteMade.GetComponent<Notescript>();
                         noteSc.noteLine = noteType-51;
                         noteSc.noteNumber = Player.playScript.Notes[noteType-51].Count;
-                        Player.playScript.Notes[noteType-51].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,Type=noteType-10,scroll=noteScroll,Type2=1,proced=false});
+                        Player.playScript.Notes[noteType-51].Add(new Note{note=noteMade,snd=int.Parse(notes[i].noteValues),Time=noteTime,scroll=noteScroll,Type=1,proced=false});
                         LNactive[noteType-51]=true;
                     }
                 }else if(noteType.Equals(8)){//변속이라면
                     Player.playScript.BPM = float.Parse(notes[i].noteValues);
                     Player.playScript.scrolls.Enqueue(new ScrollNote{type=8,time=noteTime,scroll=noteScroll,value=float.Parse(notes[i].noteValues)});
                 }else if(noteType.Equals(4)){//BGA라면
-                    //VideoManager vManagerScript = videoObj.GetComponent<VideoManager>();
-                    //vManagerScript.time = noteTime;
-                    //vManagerScript.fileLoc = Path.GetDirectoryName(fileLocation)+'/'+notes[i].noteValues;
-                    //StartCoroutine(vManagerScript.playVideo());
+                    VideoManager vManagerScript = videoObj.GetComponent<VideoManager>();
+                    vManagerScript.time = noteTime;
+                    vManagerScript.fileLoc = Path.GetDirectoryName(fileLocation)+'/'+notes[i].noteValues;
+                    StartCoroutine(vManagerScript.playVideo());
                 }else if(noteType.Equals(9)){//STOP이라면
                     Player.playScript.scrolls.Enqueue(new ScrollNote{type=9,time=noteTime,scroll=noteScroll,value=(float.Parse(notes[i].noteValues))/192*240/Player.playScript.BPM});
                     noteTime += (float.Parse(notes[i].noteValues))/192*240/Player.playScript.BPM;
@@ -555,7 +555,6 @@ public struct Note{
     public int snd;
     public float Time;
     public int Type;
-    public int Type2;
     public float scroll;
     public GameObject note;
     public bool proced;

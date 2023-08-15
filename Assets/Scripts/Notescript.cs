@@ -21,7 +21,7 @@ public class Notescript : MonoBehaviour
     }
     void Start(){
         if(noteType!=3){
-            noteType=Player.playScript.Notes[noteLine][noteNumber].Type2;
+            noteType=Player.playScript.Notes[noteLine][noteNumber].Type;
             if(!noteLine.Equals(null)&&!noteNumber.Equals(null)){
                 y=0;
                 if(noteType.Equals(2)){
@@ -43,17 +43,26 @@ public class Notescript : MonoBehaviour
             sr.sprite = Notes[dataManager.noteSprite[noteLine+240]];
             x = dataManager.noteLoc[noteLine]+dataManager.playAreaX;
             y=0;
-            scroll=Player.playScript.Notes[noteLine][noteNumber-1].scroll;
+            scroll=Player.playScript.Notes[noteLine][noteNumber].scroll;
             LNleng=Player.playScript.Notes[noteLine][noteNumber].scroll-Player.playScript.Notes[noteLine][noteNumber-1].scroll;
         }
     }
-    void LateUpdate(){
+    void Update(){
         if(Player.playScript.Notes[noteLine][noteNumber].proced){
             Destroy(gameObject);
         }else{
-            tr.position = new Vector3(x,((scroll-Player.totalScroll)*723*Player.HISPEED)+357+y,0);
             if(noteType.Equals(3)){
-                tr.sizeDelta = new Vector2(sr.sprite.bounds.size.x,LNleng*723*Player.HISPEED);
+                if(Player.playScript.Notes[noteLine][noteNumber].Type==3){
+                    tr.position = new Vector3(x,357+y,0);
+                    sr.sprite = Notes[dataManager.noteSprite[noteLine+240]+3];
+                    tr.sizeDelta = new Vector2(sr.sprite.bounds.size.x,(scroll-Player.totalScroll)*723*Player.HISPEED);
+                }else{
+                    sr.sprite = Notes[dataManager.noteSprite[noteLine+240]];
+                    tr.position = new Vector3(x,((scroll-Player.totalScroll-LNleng)*723*Player.HISPEED)+357+y,0);
+                    tr.sizeDelta = new Vector2(sr.sprite.bounds.size.x,LNleng*723*Player.HISPEED);
+                }
+            }else{
+                tr.position = new Vector3(x,((scroll-Player.totalScroll)*723*Player.HISPEED)+357+y,0);
             }
         }
     }
